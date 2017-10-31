@@ -129,5 +129,5 @@ then put it into your web page(will not work due to cross domain request restric
 
 # Google Apps Script(GAS)
 
-GAS version is not working due to some GAS runtime issues and bugs.
-Download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/google-apps-script/bundle.min.js),
+**GAS version is not working due to some GAS runtime issues and bugs.**
+Download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/google-apps-script/bundle.min.js).

@@ -12,17 +12,15 @@ This library could run under several javascript-compatible environments like:
 * Browser Extensions(you need to add the mws endpoint urls to manifest.json to allow access)
 * [Google App Scripts](https://developers.google.com/apps-script/), **not working due to GAS runtime issues and bugs**
 
-# Examples
+# Nodejs
 
-## Nodejs
-
-### Install
+## Install
 
 ```
 npm install --save @lemay/mws-api-lite
 ```
 
-### Usage
+## Usage
 
 There are three API signatures in this client.
 
@@ -44,7 +42,7 @@ the `params` is a request parameter object, e.g. `{"CreatedAfter": '2017-10-20T0
 
 Since marketplace id is used all the time in MWS APIs, we provide a special class method `getMarketplaceId()`, it takes a country code like `CN`, `US`, `JP`, `FR` etc, and will return the corresponding Amazon marketplace id, see examples below.
 
-### Examples
+## Examples
 
 Create and initialize an mws client instance:
 ```javascripot
@@ -118,7 +116,7 @@ client_auth.SubmitFeed({FeedType: '_POST_FLAT_FILE_LISTINGS_DATA_', "Marketplace
 });
 ```
 
-## Browser or Browser extensions
+# Browser or Browser extensions
 
 Use `<script>` tag with jsDelivr CDN: 
 
@@ -129,7 +127,7 @@ Use `<script>` tag with jsDelivr CDN:
 Or download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/browser/bundle.min.js),
 then put it into your web page(will not work due to cross domain request restriction) or extension.
 
-## Google Apps Script(GAS)
+# Google Apps Script(GAS)
 
 GAS version is not working due to some GAS runtime issues and bugs.
 Download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/google-apps-script/bundle.min.js),

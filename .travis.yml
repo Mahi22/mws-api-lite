@@ -1,0 +1,17 @@
+sudo: false
+language: node_js
+node_js:
+  - node
+
+script:
+  - npm run build-all
+  - npm test
+
+deploy:
+  provider: npm
+  email: niminghao804@gmail.com
+  api_key:
+    secure: Y00YyC7o87EFbuj+dePaOmq/iZB2RMmdl4eSuzMiAwets5usliQ+ygtEAta9o5btc6lIecaQe2Rqdc3K64tFq3dU2PLDhu+90dY1KJKNiMxtTCJHSTN+g9kieP2RBvdFVwAqABCrhjODvroDOUlWpGkaocxtd6mzK4mxPnOBvLdyHx0JYM86FgwyazgOHdik0DYudy+7xCuDnwfTOMqTpgRRidfkvV1GEiVoCrec55GzPlRduUgS/okj8GmW02KHlYmcR348RHlf8fx0A3+XNPoURvE1dD975eXEJayD/EQTRX/b6tvNnhd5D2mak6lA7C+lbsViEZI6MsY16qXCcvX2FbWZDQmNk59N2iGPHeXJbE8WSfys6fmUgkP1yUZZ7tYBnjZqFhj8ZoVB8EIXPhY0kksS0ST8UF7hML+fpLxsmWydwR/fQIYvzLzL9UxkqAOx2m3Kf9LaIG9othV3b8Rq2+D0u2UmPp9ZztXZSivSSMd4D9wevSp7uyDxi6igM9Y52LjSjHzh5EGln+O36BQ/hed2dtJYfdlzRC7jZh7gXOMBm7PiKkbXT8LVH1X/JMCc3LJg8T3x4THYe56Ll9wIlpEPUmvu8x/dTHG/C/qn3xNNoCtK2Xq6sC/ShrliihKWAgkvc9CuNx8xxnr3TbMcD1Zq6xvDMbTzjiZmITE=
+  on:
+    tags: true
+    repo: lemay/mws-api-lite

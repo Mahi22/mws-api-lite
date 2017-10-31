@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "target": "es5",
+    "sourceMap": false,
+    "moduleResolution": "Node",
+    "outDir": "browser"
+  },
+  "files": [
+    "src/browser.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}

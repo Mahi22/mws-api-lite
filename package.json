@@ -1,0 +1,58 @@
+{
+  "name": "@lemay/mws-api-lite",
+  "version": "1.0.0",
+  "description": "Lightweight Amazon MWS API Client",
+  "main": "nodejs/nodejs.js",
+  "bugs": {
+    "url": "https://github.com/lemay/mws-api-lite/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lemay/mws-api-lite.git"
+  },
+  "keywords": [
+    "Amazon",
+    "MWS",
+    "API"
+  ],
+  "homepage": "https://github.com/lemay/mws-api-lite#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "mocha",
+    "clean": "rm -rf browser nodejs google-apps-script",
+    "init-version": "node init-version.js",
+    "build-all": "npm run clean && npm run build-nodejs && npm run build-browser && npm run build-apps-script",
+    "build-nodejs": "tsc -p tsconfig-nodejs.json && npm run init-version -- nodejs",
+    "build-apps-script": "tsc -p tsconfig-google-apps-script.json  && npm run init-version -- google-apps-script && browserify google-apps-script/google-apps-script.js --detect-globals=false -s GoogleAppsScriptMWSClient -o google-apps-script/bundle.js && uglifyjs google-apps-script/bundle.js -o google-apps-script/bundle.min.js",
+    "build-browser": "tsc -p tsconfig-browser.json && npm run init-version -- browser && browserify browser/browser.js -s WebBrowserMWSClient -o browser/bundle.js && uglifyjs browser/bundle.js -o browser/bundle.min.js"
+  },
+  "author": "Lemay Software <hi@lemay.cc> (http://lemay.cc)",
+  "license": "MIT",
+  "dependencies": {
+    "@lemay/mws-api-info": "^1.0.4",
+    "iconv-lite": "^0.4.19",
+    "request": "^2.83.0",
+    "xml-js": "^1.5.1"
+  },
+  "files": [
+    "tests/",
+    "nodejs/*",
+    "google-apps-script/bundle.min.js",
+    "google-apps-script/bundle.js",
+    "browser/bundle.min.js",
+    "browser/bundle.js"
+  ],
+  "devDependencies": {
+    "@types/node": "^8.0.47",
+    "browserify": "^14.5.0",
+    "create-hmac": "^1.1.6",
+    "md5": "^2.2.1",
+    "mocha": "^4.0.1",
+    "request-debug": "^0.2.0",
+    "typedarray": "0.0.6",
+    "typescript": "^2.5.3",
+    "uglify-js": "^3.1.5"
+  }
+}

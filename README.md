@@ -121,6 +121,9 @@ Use `<script>` tag with jsDelivr CDN:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/browser/bundle.min.js"></script>
+<script>
+var client = new WebBrowserMWSClient(...);
+</script>
 ```
 
 Or download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/browser/bundle.min.js),
@@ -129,4 +132,9 @@ then put it into your web page(will not work due to cross domain request restric
 # Google Apps Script(GAS)
 
 **GAS version is not working due to some GAS runtime issues and bugs.**
+
+```js
+var client = new GoogleAppsScriptMWSClient(...);
+```
+
 Download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/google-apps-script/bundle.min.js).

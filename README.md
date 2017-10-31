@@ -1,4 +1,6 @@
-#Introduction 
+[![travis-ci-status](https://travis-ci.org/lemay/mws-api-lite.svg)](https://travis-ci.org/lemay/mws-api-lite)
+
+# Introduction 
 
 This is a light-weight javascript library for [Amazon Marketplace Web Service(Amazon MWS)](https://developer.amazonservices.com/) APIs. 
 It is called to be lite-weight because it only provides essentials to use Amazon MWS, it doesn't provide abstract API data types and specific API wrapper function.
@@ -15,11 +17,34 @@ This library could run under several javascript-compatible environments like:
 ## Nodejs
 
 ### Install
+
 ```
 npm install --save @lemay/mws-api-lite
 ```
 
 ### Usage
+
+There are three API signatures in this client.
+
+```js
+// For API without body data, use this
+apiName(params, callback);
+
+// For special API SubmitFeed or any API that has request body, use this one, body should be a js string, client will do the encoding
+apiName(params, body, callback);
+
+// For special API GetServiceStatus, use this, the first parameter is the section name API, with whitespace striped
+// it could be "Orders", "Products", "FulfillmentOutboundShipment", "Reports" etc
+apiName('Orders', callback);
+```
+
+the `callback` is a standard Node.js style callback, first parameter is `err`, and second one is `response`, always compare `err` with null to check err, sometimes the api call may also throw an error, so a `try catch` block is recommended.
+
+the `params` is a request parameter object, e.g. `{"CreatedAfter": '2017-10-20T00:00:00Z', "MarketplaceId.Id.1": MWSClient.getMarketplaceId('US')}`, when there is no request parameters, use a blank object `{}`.
+
+Since marketplace id is used all the time in MWS APIs, we provide a special class method `getMarketplaceId()`, it takes a country code like `CN`, `US`, `JP`, `FR` etc, and will return the corresponding Amazon marketplace id, see examples below.
+
+### Examples
 
 Create and initialize an mws client instance:
 ```javascripot
@@ -95,12 +120,16 @@ client_auth.SubmitFeed({FeedType: '_POST_FLAT_FILE_LISTINGS_DATA_', "Marketplace
 
 ## Browser or Browser extensions
 
-### Install
-Just download the pre-built version from jsDelivr.com.
-And put it into your web page(will not work due to cross domain request restriction) or extension.
+Use `<script>` tag with jsDelivr CDN: 
 
-### Usage
+```html
+<script src="https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/browser/bundle.min.js"></script>
+```
 
-## GAS (Google Apps Script)
+Or download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/browser/bundle.min.js),
+then put it into your web page(will not work due to cross domain request restriction) or extension.
+
+## Google Apps Script(GAS)
 
 GAS version is not working due to some GAS runtime issues and bugs.
+Download the pre-built version from [jsDelivr.com](https://cdn.jsdelivr.net/npm/@lemay/mws-api-lite@latest/google-apps-script/bundle.min.js),

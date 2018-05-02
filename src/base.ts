@@ -229,7 +229,7 @@ abstract class MWSClientBase{
     this.auth_token=auth_token;
   }
 
-  callApi(){
+  callApi(...args: any[]){
     var section=null;
     var version=null;
     var action=null;

@@ -7,7 +7,8 @@
     "target": "es5",
     "sourceMap": false,
     "moduleResolution": "Node",
-    "outDir": "browser"
+    "outDir": "browser",
+    "lib": ["es5", "es6", "es7", "esnext", "dom"]
   },
   "files": [
     "src/browser.ts"

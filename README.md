@@ -1,7 +1,7 @@
 [![travis-ci-status](https://travis-ci.org/lemay/mws-api-lite.svg)](https://travis-ci.org/lemay/mws-api-lite)
-![npm version](https://img.shields.io/npm/v/@lemay/mws-api-lite.svg)
-![npm downloads](https://img.shields.io/npm/dy/@lemay/mws-api-lite.svg)
-
+[![npm version](https://img.shields.io/npm/v/@lemay/mws-api-lite.svg)](https://www.npmjs.com/package/@lemay/mws-api-lite)
+[![npm downloads](https://img.shields.io/npm/dy/@lemay/mws-api-lite.svg)](https://www.npmjs.com/package/@lemay/mws-api-lite)
+[![](https://data.jsdelivr.com/v1/package/npm/@lemay/mws-api-lite/badge)](https://www.jsdelivr.com/package/npm/@lemay/mws-api-lite)
 
 # Introduction 
 

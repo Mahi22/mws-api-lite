@@ -1,4 +1,7 @@
 [![travis-ci-status](https://travis-ci.org/lemay/mws-api-lite.svg)](https://travis-ci.org/lemay/mws-api-lite)
+![npm version](https://img.shields.io/npm/v/@lemay/mws-api-lite.svg)
+![npm downloads](https://img.shields.io/npm/dy/@lemay/mws-api-lite.svg)
+
 
 # Introduction 
 

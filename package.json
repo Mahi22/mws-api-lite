@@ -1,6 +1,6 @@
 {
   "name": "@lemay/mws-api-lite",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "Lightweight Amazon MWS API Client",
   "main": "nodejs/nodejs.js",
   "bugs": {
@@ -42,7 +42,8 @@
     "google-apps-script/bundle.min.js",
     "google-apps-script/bundle.js",
     "browser/bundle.min.js",
-    "browser/bundle.js"
+    "browser/bundle.js",
+    "README.md"
   ],
   "devDependencies": {
     "@types/node": "^10.0.2",

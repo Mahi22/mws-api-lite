@@ -1,6 +1,6 @@
 {
   "name": "@lemay/mws-api-lite",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Lightweight Amazon MWS API Client",
   "main": "nodejs/nodejs.js",
   "bugs": {

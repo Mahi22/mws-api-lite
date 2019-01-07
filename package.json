@@ -1,6 +1,6 @@
 {
   "name": "@lemay/mws-api-lite",
-  "version": "1.0.10",
+  "version": "1.1.10",
   "description": "Lightweight Amazon MWS API Client",
   "main": "nodejs/nodejs.js",
   "bugs": {
@@ -32,9 +32,9 @@
   "license": "MIT",
   "dependencies": {
     "@lemay/mws-api-info": "^1.0.5",
-    "iconv-lite": "^0.4.19",
-    "request": "^2.83.0",
-    "xml-js": "^1.5.1"
+    "iconv-lite": "^0.4.24",
+    "request": "^2.88.0",
+    "xml-js": "^1.6.8"
   },
   "files": [
     "tests/",
@@ -47,7 +47,7 @@
   ],
   "devDependencies": {
     "@types/node": "^10.0.2",
-    "browserify": "^16.2.0",
+    "browserify": "^16.2.3",
     "create-hmac": "^1.1.7",
     "md5": "^2.2.1",
     "mocha": "^5.1.1",

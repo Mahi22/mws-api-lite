@@ -49,6 +49,10 @@ const api_mapping={
   Subscriptions: {
     path: 'Subscriptions',
     version: '2013-07-01',
+  },
+  EasyShip: {
+    path: 'EasyShip',
+    version: '2018-09-01'
   }
 };
 
@@ -709,6 +713,23 @@ abstract class MWSClientBase{
 
   UpdateSubscription(...params){
     return this._invokeApi('Subscriptions', 'UpdateSubscription', ...params);
+  }
+
+  // EasyShip API Methods
+  ListPickupSlots(...params) {
+    return this._invokeApi('EasyShip', 'ListPickupSlots', ...params);
+  }
+
+  CreateScheduledPackage(...params) {
+    return this._invokeApi('EasyShip', 'CreateScheduledPackage', ...params);
+  }
+
+  UpdateScheduledPackages(...params) {
+    return this._invokeApi('EasyShip', 'UpdateScheduledPackages', ...params);
+  }
+
+  GetScheduledPackage(...params) {
+    return this._invokeApi('EasyShip', 'GetScheduledPackage', ...params);
   }
 
   // Get API Service Status Methods

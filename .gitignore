@@ -1,7 +1,5 @@
 *.swp
 .DS_Store
-browser/
-nodejs/
 node_modules/
 google-apps-script/
 yarn.lock

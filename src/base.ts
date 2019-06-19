@@ -310,9 +310,9 @@ abstract class MWSClientBase{
       url=url+'?'+queryString;
 
     if(action=='SubmitFeed'){
-      this.makeHttpRequest('POST', url, headers, feed, cbk);
+      return this.makeHttpRequest('POST', url, headers, feed, cbk);
     } else {
-      this.makeHttpRequest('POST', url, headers, null, cbk);
+      return this.makeHttpRequest('POST', url, headers, null, cbk);
     }
   }
 

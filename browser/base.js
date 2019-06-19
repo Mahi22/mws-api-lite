@@ -72,7 +72,7 @@ var MWSClientBase = (function () {
         this.auth_token = auth_token;
     }
     MWSClientBase.version = function () {
-        return "1.1.11";
+        return "1.1.12";
     };
     MWSClientBase.escapeUserAgentFieldValue = function (v) {
         return v.replace(/[\\\/();=]/g, function (m) {
@@ -263,10 +263,10 @@ var MWSClientBase = (function () {
         if (queryString)
             url = url + '?' + queryString;
         if (action == 'SubmitFeed') {
-            this.makeHttpRequest('POST', url, headers, feed, cbk);
+            return this.makeHttpRequest('POST', url, headers, feed, cbk);
         }
         else {
-            this.makeHttpRequest('POST', url, headers, null, cbk);
+            return this.makeHttpRequest('POST', url, headers, null, cbk);
         }
     };
     MWSClientBase.prototype._invokeApi = function (section, name) {

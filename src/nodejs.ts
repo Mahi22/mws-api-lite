@@ -25,7 +25,7 @@ class NodeJSMWSClient extends MWSClientBase{
       headers: headers,
       body: body
     };
-    request(options, function(err, res){
+    return request(options, function(err, res){
       var parsed_err=null;
       var parsed_res=null;
       if(err){

@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/mahesh/.nvm/versions/node/v11.15.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js build-nodejs
+  /Users/mahesh/.nvm/versions/node/v11.15.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js test
 
 PATH: 
   /Users/mahesh/.rvm/gems/ruby-2.6.3/bin:/Users/mahesh/.rvm/gems/ruby-2.6.3@global/bin:/Users/mahesh/.rvm/rubies/ruby-2.6.3/bin:/Users/mahesh/.nvm/versions/node/v11.15.0/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/mahesh/Library/Android/sdk/tools:/Users/mahesh/Library/Android/sdk/platform-tools:/Applications/Postgres.app/Contents/Versions/latest/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/mahesh/Library/Android/sdk/tools:/Users/mahesh/Library/Android/sdk/tools/bin:/Users/mahesh/Library/Android/sdk/platform-tools:/Users/mahesh/.rvm/bin
@@ -1473,6 +1473,10 @@ Lockfile:
     version "1.1.0"
     resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.0.tgz#bd76d6a23323e2ca8ffa12028dc04559c75f9019"
   
+  webpack-node-externals@^1.7.2:
+    version "1.7.2"
+    resolved "https://registry.yarnpkg.com/webpack-node-externals/-/webpack-node-externals-1.7.2.tgz#6e1ee79ac67c070402ba700ef033a9b8d52ac4e3"
+  
   wrappy@1:
     version "1.0.2"
     resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
@@ -1497,9 +1501,9 @@ Lockfile:
 
 Trace: 
   Error: Command failed.
-  Exit code: 2
+  Exit code: 1
   Command: sh
-  Arguments: -c tsc -p tsconfig-nodejs.json && npm run init-version -- nodejs
+  Arguments: -c mocha --require mocha-steps
   Directory: /Users/mahesh/Documents/easy/mws-api-lite
   Output:
   

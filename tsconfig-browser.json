@@ -12,8 +12,6 @@
   },
   "files": [
     "src/browser.ts",
-    "src/actions.ts",
-    "src/sequences.ts"
   ],
   "exclude": [
     "node_modules",

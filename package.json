@@ -20,7 +20,7 @@
     "access": "public"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --require mocha-steps",
     "clean": "rm -rf browser nodejs google-apps-script",
     "init-version": "node init-version.js",
     "build-all": "npm run clean && npm run build-nodejs && npm run build-browser && npm run build-apps-script",
@@ -33,6 +33,7 @@
   "dependencies": {
     "@lemay/mws-api-info": "^1.0.5",
     "iconv-lite": "^0.4.24",
+    "ramda": "^0.26.1",
     "request": "^2.88.0",
     "xml-js": "^1.6.8"
   },
@@ -48,10 +49,12 @@
   "devDependencies": {
     "@types/node": "^10.0.2",
     "browserify": "^16.2.3",
+    "chai": "^4.2.0",
     "create-hmac": "^1.1.7",
     "function-tree": "^3.3.1",
     "md5": "^2.2.1",
     "mocha": "^5.1.1",
+    "mocha-steps": "^1.3.0",
     "request-debug": "^0.2.0",
     "typedarray": "0.0.6",
     "typescript": "^2.8.3",

@@ -4,10 +4,10 @@ const crypto = require('crypto');
 const request = require('request');
 const buffer = require('buffer');
 const iconv = require('iconv-lite');
-const actions = require('./actions');
-const sequences = require('./sequences');
+const ACTIONS = require('./actions');
+const SEQUENCES = require('./sequences');
 
-class NodeJSMWSClient extends MWSClientBase{
+export class NodeJSMWSClient extends MWSClientBase{
   calcMD5(content): string{
     var hash = crypto.createHash('md5');
     hash.update(content);
@@ -47,6 +47,11 @@ class NodeJSMWSClient extends MWSClientBase{
   }
 }
 
-exports.NodeJSMWSClient=NodeJSMWSClient;
-exports.ACTIONS = actions;
-exports.SEQUENCES = sequences;
+// exports.NodeJSMWSClient=NodeJSMWSClient;
+// exports.ACTIONS = actions;
+// exports.SEQUENCES = sequences;
+module.exports = {
+  NodeJSMWSClient,
+  ACTIONS,
+  SEQUENCES
+}

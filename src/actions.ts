@@ -23,15 +23,14 @@ export const createAmazonAuthfetch = async ({ props: { credentials } }) => ({
  */
 export const checkOrderServiceStatus = async ({ props: { authfetch } }) =>
 new Promise((resolve, reject) => {
-  authfetch.ListMarketplaceParticipations(function(err, res) {
+  authfetch.ListMarketplaceParticipations(function(err, response) {
     if (err) {
       reject(err);
     } else {
-      if (res.status === 200) {
+      if (response.status === 200) {
         resolve({ valid: true });
       } else {
-        console.log(res);
-        resolve({ valid: false, res });
+        resolve({ valid: false, response });
       }
     }
   });

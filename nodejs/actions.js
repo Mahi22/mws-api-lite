@@ -38,8 +38,7 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var ramda_1 = require("ramda");
 var nodejs_1 = require("./nodejs");
-var Actions;
-Actions.createAmazonAuthfetch = function (_a) {
+exports.createAmazonAuthfetch = function (_a) {
     var credentials = _a.props.credentials;
     return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_b) {
@@ -49,7 +48,7 @@ Actions.createAmazonAuthfetch = function (_a) {
         });
     });
 };
-Actions.checkOrderServiceStatus = function (_a) {
+exports.checkOrderServiceStatus = function (_a) {
     var authfetch = _a.props.authfetch;
     return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_b) {
@@ -72,4 +71,3 @@ Actions.checkOrderServiceStatus = function (_a) {
         });
     });
 };
-module.exports = Actions;

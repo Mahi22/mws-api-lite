@@ -1,13 +1,11 @@
 import { compose, tail, split } from 'ramda';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
-let Actions;
-
 /**
  * @param credentials - { marketplace, accesskey, secret, sellerID, mwsAuthToken }
  * @return authfetch
  */
-Actions.createAmazonAuthfetch = async ({ props: { credentials } }) => ({
+export const createAmazonAuthfetch = async ({ props: { credentials } }) => ({
   authfetch: new MWSClient(
     compose(
       tail,
@@ -23,7 +21,7 @@ Actions.createAmazonAuthfetch = async ({ props: { credentials } }) => ({
 /**
  * @param authfetch
  */
-Actions.checkOrderServiceStatus = async ({ props: { authfetch } }) =>
+export const checkOrderServiceStatus = async ({ props: { authfetch } }) =>
 new Promise((resolve, reject) => {
   authfetch.ListMarketplaceParticipations(function(err, res) {
     if (err) {
@@ -38,5 +36,3 @@ new Promise((resolve, reject) => {
     }
   });
 });
-
-module.exports = Actions;

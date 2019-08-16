@@ -33,7 +33,6 @@
   "dependencies": {
     "@lemay/mws-api-info": "^1.0.5",
     "iconv-lite": "^0.4.24",
-    "ramda": "^0.26.1",
     "request": "^2.88.0",
     "xml-js": "^1.6.8"
   },

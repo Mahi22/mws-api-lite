@@ -15,6 +15,8 @@ var crypto = require('crypto');
 var request = require('request');
 var buffer = require('buffer');
 var iconv = require('iconv-lite');
+var actions = require('./actions');
+var sequences = require('./sequences');
 var NodeJSMWSClient = (function (_super) {
     __extends(NodeJSMWSClient, _super);
     function NodeJSMWSClient() {
@@ -57,3 +59,5 @@ var NodeJSMWSClient = (function (_super) {
     return NodeJSMWSClient;
 }(base_1.MWSClientBase));
 exports.NodeJSMWSClient = NodeJSMWSClient;
+exports.ACTIONS = actions;
+exports.SEQUENCES = sequences;

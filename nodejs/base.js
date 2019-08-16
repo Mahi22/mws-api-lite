@@ -72,7 +72,7 @@ var MWSClientBase = (function () {
         this.auth_token = auth_token;
     }
     MWSClientBase.version = function () {
-        return "1.1.12";
+        return "1.1.13";
     };
     MWSClientBase.escapeUserAgentFieldValue = function (v) {
         return v.replace(/[\\\/();=]/g, function (m) {

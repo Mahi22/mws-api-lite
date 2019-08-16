@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const request = require('request');
 const buffer = require('buffer');
 const iconv = require('iconv-lite');
+const actions = require('./actions');
+const sequences = require('./sequences');
 
 class NodeJSMWSClient extends MWSClientBase{
   calcMD5(content): string{
@@ -46,3 +48,5 @@ class NodeJSMWSClient extends MWSClientBase{
 }
 
 exports.NodeJSMWSClient=NodeJSMWSClient;
+exports.ACTIONS = actions;
+exports.SEQUENCES = sequences;

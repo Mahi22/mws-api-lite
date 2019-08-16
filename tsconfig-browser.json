@@ -11,7 +11,9 @@
     "lib": ["es5", "es6", "es7", "esnext", "dom"]
   },
   "files": [
-    "src/browser.ts"
+    "src/browser.ts",
+    "src/actions.ts",
+    "src/sequences.ts"
   ],
   "exclude": [
     "node_modules",

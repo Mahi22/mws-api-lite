@@ -186,7 +186,7 @@ exports.subscribeOrderItems = function (_a) {
     var orderItems$ = _a.props.orderItems$;
     return new Promise(function (resolve) {
         orderItems$.subscribe(function (orderItems) {
-            resolve(orderItems);
+            resolve({ orderItems: orderItems });
         });
     });
 };

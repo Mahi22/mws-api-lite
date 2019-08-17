@@ -180,6 +180,6 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
 export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
   new Promise((resolve) => {
     orderItems$.subscribe(orderItems => {
-      resolve(orderItems);
+      resolve({ orderItems });
     });
   });

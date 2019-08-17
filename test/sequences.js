@@ -1,13 +1,11 @@
 var FunctionTree = require('function-tree');
 var Credentials = require('../credentials');
-var { validAmazonCredentials } = require('../nodejs/sequences');
+var { validAmazonCredentials, fetchAmazonOrders } = require('../nodejs/sequences');
 
 var FT = new FunctionTree.default();
 
-console.log(validAmazonCredentials);
-
-describe('Sequence::Module::Connector', () => {
-  it('sequence validate amazon marketplace', done => {
+describe('Sequence', () => {
+  step('sequence validate amazon marketplace', done => {
     FT.run(
       [
         validAmazonCredentials,
@@ -19,6 +17,28 @@ describe('Sequence::Module::Connector', () => {
       {
         credentials: Credentials
       }
-    );
+    ).catch(console.error);
   });
+
+  step('sequence fetch order List', done => {
+    FT.run(
+      [
+        fetchAmazonOrders,
+        ({ props }) => {
+          props.orderItems$.subscribe(val => {
+            console.log('**--**--**');
+            console.log(val);
+            done();
+          }, err => {
+            console.log('ERROR CAUGHTTT');
+            done(err);
+          })
+        }
+      ],
+      {
+        credentials: Credentials,
+        days: 3
+      }
+    )
+  }).timeout(12000000)
 });

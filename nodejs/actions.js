@@ -182,3 +182,11 @@ exports.fetchOrderItems$ = function (_a) {
         }), operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
     });
 };
+exports.subscribeOrderItems = function (_a) {
+    var orderItems$ = _a.props.orderItems$;
+    return new Promise(function (resolve) {
+        orderItems$.subscribe(function (orderItems) {
+            resolve(orderItems);
+        });
+    });
+};

@@ -149,3 +149,37 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
       map(arr => flatten(arr))
     )
   });
+
+// const orderItemsNext$ = authfetch => NextToken =>
+//   from(new Promise((resolve, reject) => {
+//     authfetch.ListOrderItemsByNextToken({
+//       NextToken
+//     }, (error, response) => {
+//       if (error) {
+//         reject(error)
+//       } else {
+//         resolve((parser.parse(response.body)).ListOrderItemsByNextTokenResponse.ListOrderItemsByNextTokenResult);
+//       }
+//     })
+//   })).pipe(
+//     retryWhen(genericRetryStrategy({
+//       scalingDuration: 30000,
+//       includedStatusCodes: [503]
+//     }))
+//   );
+
+// export const fetchOrderItemsNext$ = ({ props: { authfetch, orderItems$ } }) =>
+//   ({
+//     orderItemsNext$: orderItems$.pipe(
+//       expand(({ NextToken }) => NextToken ? orderItemsNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
+//       concatMap(({ OrderItems }) => typeof OrderItems.OrderItem === 'string' ? [OrderItems.OrderItem] : Orders.Order),
+//       // toArray()
+//     )
+//   });
+
+export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
+  new Promise((resolve) => {
+    orderItems$.subscribe(orderItems => {
+      resolve(orderItems);
+    });
+  });

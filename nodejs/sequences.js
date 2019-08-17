@@ -11,5 +11,6 @@ exports.fetchAmazonOrders = function_tree_1.sequence('Fetching Amazon Orders', [
     actions_1.createAmazonAuthfetch,
     actions_1.fetchOrderList$,
     actions_1.fetchOrderListNext$,
-    actions_1.fetchOrderItems$
+    actions_1.fetchOrderItems$,
+    actions_1.subscribeOrderItems
 ]);

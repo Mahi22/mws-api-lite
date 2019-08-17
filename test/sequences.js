@@ -24,15 +24,9 @@ describe('Sequence', () => {
     FT.run(
       [
         fetchAmazonOrders,
-        ({ props }) => {
-          props.orderItems$.subscribe(val => {
-            console.log('**--**--**');
-            console.log(val);
-            done();
-          }, err => {
-            console.log('ERROR CAUGHTTT');
-            done(err);
-          })
+        ({ props: { orderItems } }) => {
+          console.log(orderItems);
+          done();
         }
       ],
       {

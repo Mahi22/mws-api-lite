@@ -25,7 +25,9 @@ describe('Sequence', () => {
       [
         fetchAmazonOrders,
         ({ props: { orderItems } }) => {
-          console.log(orderItems);
+          console.log('-----');
+          console.log(JSON.stringify(orderItems));
+          console.log('-----');
           done();
         }
       ],

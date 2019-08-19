@@ -141,7 +141,7 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
         if (Array.isArray(OrderItems.OrderItem)) {
           return OrderItems.OrderItem.map(item => ({ ...order, item }));
         } else {
-          return [{ ...order, item: OrderItems.OrderItem }];
+          return [{ ...order, item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId }];
         }
       }),
       // tap(console.log),

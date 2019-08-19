@@ -177,7 +177,7 @@ exports.fetchOrderItems$ = function (_a) {
                 return OrderItems.OrderItem.map(function (item) { return (__assign({}, order, { item: item })); });
             }
             else {
-                return [__assign({}, order, { item: OrderItems.OrderItem })];
+                return [__assign({}, order, { item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId })];
             }
         }), operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
     });

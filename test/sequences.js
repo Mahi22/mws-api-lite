@@ -53,15 +53,13 @@ describe('Sequence', () => {
 
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     const StartDate = moment()
-    .subtract(1, 'days')
-    .startOf('day')
-    .toISOString();
+      .subtract(1, 'days')
+      .startOf('day')
+      .toISOString();
     const EndDate = moment()
-    .startOf('day')
-    .toISOString();
+      .startOf('day')
+      .toISOString();
 
-    console.log(StartDate);
-    console.log(EndDate);
     FT.run(
       [
         downloadTsvReport,
@@ -77,6 +75,31 @@ describe('Sequence', () => {
           ReportType: '_GET_FBA_FULFILLMENT_CURRENT_INVENTORY_DATA_',
           StartDate,
           EndDate
+        }
+      }
+    )
+  }).timeout(12000000);
+
+  step('sequence request Report XML RETURNS DATA Report', done => {
+    const StartDate = moment()
+      .subtract(30, 'days')
+      .startOf('day')
+      .toISOString();
+
+    FT.run(
+      [
+        downloadTsvReport,
+        ({ props }) => {
+          console.log('-----');
+          console.log(props.json);
+          done();
+        }
+      ],
+      {
+        credentials: Credentials,
+        requestReportParams: {
+          ReportType: '_GET_XML_RETURNS_DATA_BY_RETURN_DATE_',
+          StartDate
         }
       }
     )

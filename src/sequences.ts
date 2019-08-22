@@ -1,16 +1,21 @@
 import { sequence } from 'function-tree';
 import {
+  // --
   createAmazonAuthfetch,
   checkOrderServiceStatus,
+  // --
   fetchOrderList$,
   fetchOrderListNext$,
   fetchOrderItems$,
+  getReport$,
   subscribeOrderItems,
   requestReport$,
   requestReportResult$,
-  getReport$,
   tsv2json$,
-  subscribeJsonArray
+  xml2json$,
+  // --
+  subscribeJson,
+  subscribeReport
 } from './actions';
 
 export const Sequences = 'MWS_FUNCTION_TREE_SEQUENCES';
@@ -28,11 +33,28 @@ export const fetchAmazonOrders = sequence('Fetching Amazon Orders', [
   subscribeOrderItems
 ]);
 
+export const downloadReport = sequence('Download Report', [
+  createAmazonAuthfetch,
+  requestReport$,
+  requestReportResult$,
+  getReport$,
+  subscribeReport
+]);
+
 export const downloadTsvReport = sequence('Download TSV Report', [
   createAmazonAuthfetch,
   requestReport$,
   requestReportResult$,
   getReport$,
   tsv2json$,
-  subscribeJsonArray
+  subscribeJson
+]);
+
+export const downloadXmlReport = sequence('Download XML Report', [
+  createAmazonAuthfetch,
+  requestReport$,
+  requestReportResult$,
+  getReport$,
+  xml2json$,
+  subscribeJson
 ]);

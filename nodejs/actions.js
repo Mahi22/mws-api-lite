@@ -47,9 +47,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ramda_1 = require("ramda");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
-var moment = require("moment");
 var parser = require("fast-xml-parser");
 var nodejs_1 = require("./nodejs");
+var isIsoDate = function (str) { return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}/.test(str); };
 var genericRetryStrategy = function (_a) {
     var _b = _a.maxRetryAttempts, maxRetryAttempts = _b === void 0 ? 5 : _b, _c = _a.scalingDuration, scalingDuration = _c === void 0 ? 1000 : _c, _d = _a.includedStatusCodes, includedStatusCodes = _d === void 0 ? [] : _d, _e = _a.excludedStatusCodes, excludedStatusCodes = _e === void 0 ? [] : _e;
     return function (attempts) {
@@ -96,14 +96,19 @@ exports.checkOrderServiceStatus = function (_a) {
 };
 var downloadReport$ = function (authfetch) { return function (reportId) {
     return rxjs_1.from(new Promise(function (resolve, reject) {
-        authfetch.GetReport({ ReportId: reportId }, function (error, response) {
-            if (error) {
-                reject(error);
-            }
-            else {
-                resolve(response.body);
-            }
-        });
+        if (reportId === null) {
+            resolve('');
+        }
+        else {
+            authfetch.GetReport({ ReportId: reportId }, function (error, response) {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(response.body);
+                }
+            });
+        }
     })).pipe(operators_1.retryWhen(genericRetryStrategy({
         scalingDuration: 60000,
         includedStatusCodes: [503],
@@ -265,7 +270,7 @@ exports.tsv2json$ = function (_a) {
                         var rows$ = rxjs_1.from(arr).pipe(operators_1.skip(1), operators_1.map(function (row) { return row.split('\t'); }));
                         return rows$.pipe(operators_1.map(function (row) {
                             return row.reduce(function (rowObj, cell, i) {
-                                rowObj[header[i]] = moment(cell, moment.ISO_8601, true).isValid() || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
+                                rowObj[header[i]] = isIsoDate(cell) || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
                                 return rowObj;
                             }, {});
                         }));
@@ -274,7 +279,17 @@ exports.tsv2json$ = function (_a) {
         });
     });
 };
-exports.subscribeJsonArray = function (_a) {
+exports.xml2json$ = function (_a) {
+    var report$ = _a.props.report$;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            return [2, ({
+                    json$: report$.pipe(operators_1.map(function (val) { return parser.parse(val); }))
+                })];
+        });
+    });
+};
+exports.subscribeJson = function (_a) {
     var json$ = _a.props.json$;
     return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_b) {
@@ -294,5 +309,11 @@ exports.subscribeOrderItems = function (_a) {
             .subscribe(function (orderItems) {
             resolve({ orderItems: orderItems });
         });
+    });
+};
+exports.subscribeReport = function (_a) {
+    var report$ = _a.props.report$;
+    return new Promise(function (resolve) {
+        report$.subscribe(function (response) { return resolve({ response: response }); });
     });
 };

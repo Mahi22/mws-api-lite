@@ -14,11 +14,26 @@ exports.fetchAmazonOrders = function_tree_1.sequence('Fetching Amazon Orders', [
     actions_1.fetchOrderItems$,
     actions_1.subscribeOrderItems
 ]);
+exports.downloadReport = function_tree_1.sequence('Download Report', [
+    actions_1.createAmazonAuthfetch,
+    actions_1.requestReport$,
+    actions_1.requestReportResult$,
+    actions_1.getReport$,
+    actions_1.subscribeReport
+]);
 exports.downloadTsvReport = function_tree_1.sequence('Download TSV Report', [
     actions_1.createAmazonAuthfetch,
     actions_1.requestReport$,
     actions_1.requestReportResult$,
     actions_1.getReport$,
     actions_1.tsv2json$,
-    actions_1.subscribeJsonArray
+    actions_1.subscribeJson
+]);
+exports.downloadXmlReport = function_tree_1.sequence('Download XML Report', [
+    actions_1.createAmazonAuthfetch,
+    actions_1.requestReport$,
+    actions_1.requestReportResult$,
+    actions_1.getReport$,
+    actions_1.xml2json$,
+    actions_1.subscribeJson
 ]);

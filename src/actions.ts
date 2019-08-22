@@ -1,7 +1,6 @@
 import { compose, tail, split, flatten } from 'ramda';
-import { from, throwError, timer, empty } from 'rxjs';
+import { from, throwError, timer, empty, of } from 'rxjs';
 import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip } from 'rxjs/operators';
-import * as moment from 'moment';
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
@@ -10,6 +9,8 @@ import { NodeJSMWSClient as MWSClient } from './nodejs';
  * Helper Utilities
  * ----
  */
+const isIsoDate = (str: string) => /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}/.test(str);
+
 const genericRetryStrategy = ({
   maxRetryAttempts = 5,
   scalingDuration = 1000,
@@ -79,13 +80,17 @@ new Promise((resolve, reject) => {
  */
 const downloadReport$ = authfetch => reportId =>
   from(new Promise((resolve, reject) => {
-    authfetch.GetReport({ ReportId: reportId }, (error, response) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(response.body);
-      }
-    });
+    if (reportId === null) {
+      resolve('');
+    } else {
+      authfetch.GetReport({ ReportId: reportId }, (error, response) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response.body);
+        }
+      });
+    }
   })).pipe(
     retryWhen(genericRetryStrategy({
       scalingDuration: 60000,
@@ -275,7 +280,7 @@ export const tsv2json$ = async ({ props: { report$ } }) =>
         map(row => {
         return row.reduce((rowObj, cell, i) => {
           // @ts-ignore
-          rowObj[header[i]] = moment(cell, moment.ISO_8601, true).isValid() || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
+          rowObj[header[i]] = isIsoDate(cell) || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
           return rowObj
         }, {});
       }));
@@ -283,13 +288,20 @@ export const tsv2json$ = async ({ props: { report$ } }) =>
   )
 });
 
+export const xml2json$ = async ({ props: { report$ } }) =>
+({
+  json$: report$.pipe(
+    map((val: any) => parser.parse(val))
+  )
+})
+
 /*
  * ----
  * Subscriptions
  * ----
  */
 
-export const subscribeJsonArray = async ({ props: { json$ } }) =>
+export const subscribeJson = async ({ props: { json$ } }) =>
   new Promise((resolve) => {
     json$.pipe(toArray()).subscribe(json => {
       resolve({ json });
@@ -306,5 +318,10 @@ export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
     .subscribe(orderItems => {
       resolve({ orderItems });
     });
+  });
+
+export const subscribeReport = ({ props: { report$ } }) =>
+  new Promise((resolve) => {
+    report$.subscribe(response => resolve({ response }));
   });
 

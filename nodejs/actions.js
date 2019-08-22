@@ -51,11 +51,11 @@ var moment = require("moment");
 var parser = require("fast-xml-parser");
 var nodejs_1 = require("./nodejs");
 var genericRetryStrategy = function (_a) {
-    var _b = _a.maxRetryAttempts, maxRetryAttempts = _b === void 0 ? 5 : _b, _c = _a.scalingDuration, scalingDuration = _c === void 0 ? 1000 : _c, _d = _a.includedStatusCodes, includedStatusCodes = _d === void 0 ? [] : _d;
+    var _b = _a.maxRetryAttempts, maxRetryAttempts = _b === void 0 ? 5 : _b, _c = _a.scalingDuration, scalingDuration = _c === void 0 ? 1000 : _c, _d = _a.includedStatusCodes, includedStatusCodes = _d === void 0 ? [] : _d, _e = _a.excludedStatusCodes, excludedStatusCodes = _e === void 0 ? [] : _e;
     return function (attempts) {
         return attempts.pipe(operators_1.mergeMap(function (error, i) {
             var retryAttempt = i + 1;
-            if (retryAttempt > maxRetryAttempts || !includedStatusCodes.includes(error.status)) {
+            if (retryAttempt > maxRetryAttempts || !includedStatusCodes.includes(error.status) || excludedStatusCodes.includes(error.status)) {
                 return rxjs_1.throwError(error);
             }
             return rxjs_1.timer(retryAttempt * scalingDuration);
@@ -94,33 +94,37 @@ exports.checkOrderServiceStatus = function (_a) {
         });
     });
 };
-exports.fetchOrderList$ = function (_a) {
-    var _b = _a.props, authfetch = _b.authfetch, credentials = _b.credentials, days = _b.days;
-    return __awaiter(_this, void 0, void 0, function () {
-        return __generator(this, function (_c) {
-            return [2, ({
-                    orderList$: rxjs_1.from(new Promise(function (resolve, reject) {
-                        authfetch.ListOrders({
-                            CreatedAfter: moment()
-                                .subtract({ days: days })
-                                .toISOString(),
-                            'MarketplaceId.Id': credentials.marketplaceId
-                        }, function (error, response) {
-                            if (error) {
-                                reject(error);
-                            }
-                            else {
-                                resolve((parser.parse(response.body)).ListOrdersResponse.ListOrdersResult);
-                            }
-                        });
-                    })).pipe(operators_1.retryWhen(genericRetryStrategy({
-                        scalingDuration: 3000,
-                        includedStatusCodes: [503]
-                    })))
-                })];
+var downloadReport$ = function (authfetch) { return function (reportId) {
+    return rxjs_1.from(new Promise(function (resolve, reject) {
+        authfetch.GetReport({ ReportId: reportId }, function (error, response) {
+            if (error) {
+                reject(error);
+            }
+            else {
+                resolve(response.body);
+            }
         });
-    });
-};
+    })).pipe(operators_1.retryWhen(genericRetryStrategy({
+        scalingDuration: 60000,
+        includedStatusCodes: [503],
+        excludedStatusCodes: [404]
+    })));
+}; };
+var orderItems$ = function (authfetch) { return function (orderId) {
+    return rxjs_1.from(new Promise(function (resolve, reject) {
+        authfetch.ListOrderItems(orderId, function (error, response) {
+            if (error) {
+                reject(error);
+            }
+            else {
+                resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
+            }
+        });
+    })).pipe(operators_1.retryWhen(genericRetryStrategy({
+        scalingDuration: 30000,
+        includedStatusCodes: [503]
+    })));
+}; };
 var orderListNext$ = function (authfetch) { return function (NextToken) {
     return rxjs_1.from(new Promise(function (resolve, reject) {
         authfetch.ListOrdersByNextToken({
@@ -138,31 +142,34 @@ var orderListNext$ = function (authfetch) { return function (NextToken) {
         includedStatusCodes: [503]
     })));
 }; };
-exports.fetchOrderListNext$ = function (_a) {
-    var _b = _a.props, authfetch = _b.authfetch, orderList$ = _b.orderList$;
-    return ({
-        orderListNext$: orderList$.pipe(operators_1.expand(function (_a) {
-            var NextToken = _a.NextToken;
-            return NextToken ? orderListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
-        }), operators_1.concatMap(function (_a) {
-            var Orders = _a.Orders;
-            return typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order;
-        }))
-    });
-};
-var orderItems$ = function (authfetch) { return function (orderId) {
+var reportResult$ = function (authfetch) { return function (reportId) {
     return rxjs_1.from(new Promise(function (resolve, reject) {
-        authfetch.ListOrderItems(orderId, function (error, response) {
+        authfetch.GetReportRequestList({ 'ReportRequestIdList.Id.1': reportId }, function (error, res) {
             if (error) {
                 reject(error);
             }
             else {
-                resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
+                var response = parser.parse(res.body, { parseTrueNumberOnly: true });
+                if (response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+                    .ReportProcessingStatus === '_DONE_') {
+                    resolve(response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo.GeneratedReportId);
+                }
+                else if (response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+                    .ReportProcessingStatus === '_DONE_NO_DATA_') {
+                    resolve(null);
+                }
+                else {
+                    reject({
+                        status: 555,
+                        message: response
+                    });
+                }
             }
         });
     })).pipe(operators_1.retryWhen(genericRetryStrategy({
-        scalingDuration: 30000,
-        includedStatusCodes: [503]
+        scalingDuration: 60000,
+        includedStatusCodes: [503, 555],
+        excludedStatusCodes: [404]
     })));
 }; };
 exports.fetchOrderItems$ = function (_a) {
@@ -179,13 +186,112 @@ exports.fetchOrderItems$ = function (_a) {
             else {
                 return [__assign({}, order, { item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId })];
             }
-        }), operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
+        }))
+    });
+};
+exports.fetchOrderList$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, fetchOrderListParams = _b.fetchOrderListParams;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_c) {
+            return [2, ({
+                    orderList$: rxjs_1.from(new Promise(function (resolve, reject) {
+                        authfetch.ListOrders(fetchOrderListParams, function (error, response) {
+                            if (error) {
+                                reject(error);
+                            }
+                            else {
+                                resolve((parser.parse(response.body)).ListOrdersResponse.ListOrdersResult);
+                            }
+                        });
+                    })).pipe(operators_1.retryWhen(genericRetryStrategy({
+                        scalingDuration: 3000,
+                        includedStatusCodes: [503]
+                    })))
+                })];
+        });
+    });
+};
+exports.fetchOrderListNext$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, orderList$ = _b.orderList$;
+    return ({
+        orderListNext$: orderList$.pipe(operators_1.expand(function (_a) {
+            var NextToken = _a.NextToken;
+            return NextToken ? orderListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
+        }), operators_1.concatMap(function (_a) {
+            var Orders = _a.Orders;
+            return typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order;
+        }))
+    });
+};
+exports.getReport$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, generatedReportId$ = _b.generatedReportId$;
+    return ({
+        report$: generatedReportId$.pipe(operators_1.concatMap(downloadReport$(authfetch)))
+    });
+};
+exports.requestReport$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, requestReportParams = _b.requestReportParams;
+    return ({
+        requestedReportId$: rxjs_1.from(new Promise(function (resolve, reject) {
+            authfetch.RequestReport(requestReportParams, function (error, response) {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).RequestReportResponse.RequestReportResult.ReportRequestInfo.ReportRequestId);
+                }
+            });
+        })).pipe(operators_1.retryWhen(genericRetryStrategy({
+            scalingDuration: 3000,
+            includedStatusCodes: [503],
+            excludedStatusCodes: [404]
+        })))
+    });
+};
+exports.requestReportResult$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, requestedReportId$ = _b.requestedReportId$;
+    return ({
+        generatedReportId$: requestedReportId$.pipe(operators_1.delay(30000), operators_1.concatMap(reportResult$(authfetch)))
+    });
+};
+exports.tsv2json$ = function (_a) {
+    var report$ = _a.props.report$;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            return [2, ({
+                    json$: report$.pipe(operators_1.concatMap(function (tsv) {
+                        var arr = tsv.split('\r\n');
+                        var header = arr[0].split('\t');
+                        var rows$ = rxjs_1.from(arr).pipe(operators_1.skip(1), operators_1.map(function (row) { return row.split('\t'); }));
+                        return rows$.pipe(operators_1.map(function (row) {
+                            return row.reduce(function (rowObj, cell, i) {
+                                rowObj[header[i]] = moment(cell, moment.ISO_8601, true).isValid() || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
+                                return rowObj;
+                            }, {});
+                        }));
+                    }))
+                })];
+        });
+    });
+};
+exports.subscribeJsonArray = function (_a) {
+    var json$ = _a.props.json$;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            return [2, new Promise(function (resolve) {
+                    json$.pipe(operators_1.toArray()).subscribe(function (json) {
+                        resolve({ json: json });
+                    });
+                })];
+        });
     });
 };
 exports.subscribeOrderItems = function (_a) {
     var orderItems$ = _a.props.orderItems$;
     return new Promise(function (resolve) {
-        orderItems$.subscribe(function (orderItems) {
+        orderItems$
+            .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
+            .subscribe(function (orderItems) {
             resolve({ orderItems: orderItems });
         });
     });

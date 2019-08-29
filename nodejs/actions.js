@@ -260,17 +260,17 @@ exports.requestReportResult$ = function (_a) {
     });
 };
 exports.tsv2json$ = function (_a) {
-    var report$ = _a.props.report$;
+    var _b = _a.props, report$ = _b.report$, _c = _b.tsvSeperator, tsvSeperator = _c === void 0 ? '\r\n' : _c;
     return __awaiter(_this, void 0, void 0, function () {
-        return __generator(this, function (_b) {
+        return __generator(this, function (_d) {
             return [2, ({
                     json$: report$.pipe(operators_1.concatMap(function (tsv) {
-                        var arr = tsv.split('\r\n');
+                        var arr = tsv.split(tsvSeperator);
                         var header = arr[0].split('\t');
                         var rows$ = rxjs_1.from(arr).pipe(operators_1.skip(1), operators_1.map(function (row) { return row.split('\t'); }));
                         return rows$.pipe(operators_1.map(function (row) {
                             return row.reduce(function (rowObj, cell, i) {
-                                rowObj[header[i]] = isIsoDate(cell) || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
+                                rowObj[header[i]] = cell;
                                 return rowObj;
                             }, {});
                         }));

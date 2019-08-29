@@ -269,18 +269,18 @@ export const requestReportResult$ = ({ props: { authfetch, requestedReportId$ } 
     generatedReportId$: requestedReportId$.pipe(delay(30000), concatMap(reportResult$(authfetch)))
   });
 
-export const tsv2json$ = async ({ props: { report$ } }) =>
+export const tsv2json$ = async ({ props: { report$, tsvSeperator = '\r\n' } }) =>
 ({
   json$: report$.pipe(
     concatMap((tsv: string) => {
-      const arr = tsv.split('\r\n');
+      const arr = tsv.split(tsvSeperator);
       const header = arr[0].split('\t');
       const rows$ = from(arr).pipe(skip(1), map(row => row.split('\t')));
       return rows$.pipe(
         map(row => {
         return row.reduce((rowObj, cell, i) => {
           // @ts-ignore
-          rowObj[header[i]] = isIsoDate(cell) || isNaN(parseFloat(cell)) ? cell : parseFloat(cell);
+          rowObj[header[i]] = cell;
           return rowObj
         }, {});
       }));

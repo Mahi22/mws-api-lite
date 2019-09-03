@@ -1,6 +1,7 @@
 var FunctionTree = require('function-tree').FunctionTree;
 // var Devtools = require('function-tree/devtools').Devtools;
 var moment = require('moment');
+var { toArray, map, flatten } = require('rxjs/operators');
 var Credentials = require('../credentials');
 var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport } = require('../nodejs/sequences');
 
@@ -46,26 +47,28 @@ describe('Sequence', () => {
       }
  */
 
-  // step('sequence fetch order List', done => {
-  //   FT.run(
-  //     [
-  //       fetchAmazonOrders,
-  //       ({ props: { orderItems } }) => {
-  //         console.log('-----');
-  //         console.log(JSON.stringify(orderItems));
-  //         console.log('-----');
-  //         done();
-  //       }
-  //     ],
-  //     {
-  //       fetchOrderListParams: {
-  //         CreatedAfter: moment().subtract(3, 'days').toISOString(),
-  //         'MarketplaceId.Id': Credentials.marketplaceId
-  //       },
-  //       credentials: Credentials
-  //     }
-  //   )
-  // }).timeout(12000000)
+  step('sequence fetch order List', done => {
+    FT.run(
+      [
+        fetchAmazonOrders,
+        ({ props: { orderItems } }) => {
+          console.log('-----');
+          console.log(orderItems);
+          console.log('-----');
+          done();
+        }
+      ],
+      {
+        fetchOrderListParams: {
+          CreatedAfter: moment().subtract(0, 'days').toISOString(),
+          'MarketplaceId.Id': Credentials.marketplaceId
+        },
+        credentials: Credentials
+      }
+    )
+  }).timeout(12000000)
+
+  /*
 
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     const StartDate = moment()
@@ -96,6 +99,8 @@ describe('Sequence', () => {
       }
     )
   }).timeout(12000000);
+
+  */
 
   // step('sequence request Report XML RETURNS DATA Report', done => {
   //   const StartDate = moment()

@@ -224,7 +224,7 @@ exports.fetchOrderListNext$ = function (_a) {
             return NextToken ? orderListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
         }), operators_1.concatMap(function (_a) {
             var Orders = _a.Orders;
-            return typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order;
+            return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
         }))
     });
 };
@@ -304,10 +304,16 @@ exports.subscribeJson = function (_a) {
 exports.subscribeOrderItems = function (_a) {
     var orderItems$ = _a.props.orderItems$;
     return new Promise(function (resolve) {
+        var orderItems = [];
         orderItems$
             .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
-            .subscribe(function (orderItems) {
-            resolve({ orderItems: orderItems });
+            .subscribe({
+            next: function (result) {
+                orderItems = result;
+            },
+            complete: function () {
+                resolve({ orderItems: orderItems });
+            }
         });
     });
 };

@@ -234,7 +234,7 @@ export const fetchOrderListNext$ = ({ props: { authfetch, orderList$ } }) =>
   ({
     orderListNext$: orderList$.pipe(
       expand(({ NextToken }) => NextToken ? orderListNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
-      concatMap(({ Orders }) => typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order),
+      concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
       // toArray()
     )
   });
@@ -311,13 +311,19 @@ export const subscribeJson = async ({ props: { json$ } }) =>
 
 export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
   new Promise((resolve) => {
+    let orderItems = [];
     orderItems$
-    .pipe(
-      toArray(),
-      map(arr => flatten(arr)))
-    .subscribe(orderItems => {
-      resolve({ orderItems });
-    });
+      .pipe(
+        toArray(),
+        map(arr => flatten(arr)))
+      .subscribe({
+        next: result => {
+          orderItems = result;
+        },
+        complete: () => {
+          resolve({ orderItems });
+        }
+      });
   });
 
 export const subscribeReport = ({ props: { report$ } }) =>

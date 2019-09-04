@@ -147,6 +147,23 @@ var orderListNext$ = function (authfetch) { return function (NextToken) {
         includedStatusCodes: [503]
     })));
 }; };
+var reportListNext$ = function (authfetch) { return function (NextToken) {
+    return rxjs_1.from(new Promise(function (resolve, reject) {
+        authfetch.GetReportListByNextToken({
+            NextToken: NextToken
+        }, function (error, response) {
+            if (error) {
+                reject(error);
+            }
+            else {
+                resolve((parser.parse(response.body)).GetReportListByNextTokenResponse.GetReportListByNextTokenResult);
+            }
+        });
+    })).pipe(operators_1.retryWhen(genericRetryStrategy({
+        scalingDuration: 30000,
+        includedStatusCodes: [503]
+    })));
+}; };
 var reportResult$ = function (authfetch) { return function (reportId) {
     return rxjs_1.from(new Promise(function (resolve, reject) {
         authfetch.GetReportRequestList({ 'ReportRequestIdList.Id.1': reportId }, function (error, res) {
@@ -234,6 +251,12 @@ exports.getReport$ = function (_a) {
         report$: generatedReportId$.pipe(operators_1.concatMap(downloadReport$(authfetch)))
     });
 };
+exports.getReportById$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, reportId = _b.reportId;
+    return ({
+        report$: downloadReport$(authfetch)(reportId)
+    });
+};
 exports.requestReport$ = function (_a) {
     var _b = _a.props, authfetch = _b.authfetch, requestReportParams = _b.requestReportParams;
     return ({
@@ -251,6 +274,37 @@ exports.requestReport$ = function (_a) {
             includedStatusCodes: [503],
             excludedStatusCodes: [404]
         })))
+    });
+};
+exports.requestReportList$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, requestReportParams = _b.requestReportParams;
+    return ({
+        reportList$: rxjs_1.from(new Promise(function (resolve, reject) {
+            authfetch.GetReportList(requestReportParams, function (error, response) {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).GetReportListResponse.GetReportListResult);
+                }
+            });
+        })).pipe(operators_1.retryWhen(genericRetryStrategy({
+            scalingDuration: 3000,
+            includedStatusCodes: [503],
+            excludedStatusCodes: [404]
+        })))
+    });
+};
+exports.requestReportListNext$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, reportList$ = _b.reportList$;
+    return ({
+        reportListNext$: reportList$.pipe(operators_1.expand(function (_a) {
+            var NextToken = _a.NextToken;
+            return NextToken ? reportListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
+        }), operators_1.concatMap(function (_a) {
+            var ReportInfo = _a.ReportInfo;
+            return ReportInfo ? typeof ReportInfo === 'string' ? [ReportInfo] : ReportInfo : rxjs_1.empty();
+        }))
     });
 };
 exports.requestReportResult$ = function (_a) {
@@ -321,5 +375,11 @@ exports.subscribeReport = function (_a) {
     var report$ = _a.props.report$;
     return new Promise(function (resolve) {
         report$.subscribe(function (response) { return resolve({ response: response }); });
+    });
+};
+exports.subscribeReportList = function (_a) {
+    var reportListNext$ = _a.props.reportListNext$;
+    return new Promise(function (resolve) {
+        reportListNext$.pipe(operators_1.toArray()).subscribe(function (response) { return resolve({ response: response }); });
     });
 };

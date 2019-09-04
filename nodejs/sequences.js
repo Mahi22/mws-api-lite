@@ -29,6 +29,18 @@ exports.downloadTsvReport = function_tree_1.sequence('Download TSV Report', [
     actions_1.tsv2json$,
     actions_1.subscribeJson
 ]);
+exports.downloadTsvReportById = function_tree_1.sequence('Download TSV Report By Id', [
+    actions_1.createAmazonAuthfetch,
+    actions_1.getReportById$,
+    actions_1.tsv2json$,
+    actions_1.subscribeJson
+]);
+exports.downloadReportList = function_tree_1.sequence('Download Report List', [
+    actions_1.createAmazonAuthfetch,
+    actions_1.requestReportList$,
+    actions_1.requestReportListNext$,
+    actions_1.subscribeReportList
+]);
 exports.downloadXmlReport = function_tree_1.sequence('Download XML Report', [
     actions_1.createAmazonAuthfetch,
     actions_1.requestReport$,

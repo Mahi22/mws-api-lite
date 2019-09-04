@@ -1,5 +1,5 @@
 import { compose, tail, split, flatten } from 'ramda';
-import { from, throwError, timer, empty, of } from 'rxjs';
+import { from, throwError, timer, empty } from 'rxjs';
 import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip } from 'rxjs/operators';
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
@@ -87,6 +87,7 @@ const downloadReport$ = authfetch => reportId =>
         if (error) {
           reject(error);
         } else {
+          // console.log('GOT DOWNLOAD RESPONSE');
           resolve(response.body);
         }
       });
@@ -142,6 +143,25 @@ const orderListNext$ = authfetch => NextToken =>
         reject(error)
       } else {
         resolve((parser.parse(response.body)).ListOrdersByNextTokenResponse.ListOrdersByNextTokenResult);
+      }
+    })
+  })).pipe(
+    retryWhen(genericRetryStrategy({
+      scalingDuration: 30000,
+      includedStatusCodes: [503]
+    }))
+  );
+
+const reportListNext$ = authfetch => NextToken =>
+  from(new Promise((resolve, reject) => {
+    // console.log('REQUESTION REPORT');
+    authfetch.GetReportListByNextToken({
+      NextToken
+    }, (error, response) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve((parser.parse(response.body)).GetReportListByNextTokenResponse.GetReportListByNextTokenResult);
       }
     })
   })).pipe(
@@ -244,6 +264,12 @@ export const getReport$ = ({ props: { authfetch, generatedReportId$ } }) =>
     report$: generatedReportId$.pipe(concatMap(downloadReport$(authfetch)))
   });
 
+export const getReportById$ = ({ props: { authfetch, reportId } }) => {
+  return ({
+    report$: downloadReport$(authfetch)(reportId)
+  });
+};
+
 
 export const requestReport$ = ({ props: { authfetch, requestReportParams } }) =>
   ({
@@ -264,6 +290,35 @@ export const requestReport$ = ({ props: { authfetch, requestReportParams } }) =>
     )
   });
 
+export const requestReportList$ = ({ props: { authfetch, requestReportParams } }) =>
+  ({
+    reportList$: from(new Promise((resolve, reject) => {
+      authfetch.GetReportList(requestReportParams, (error, response) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).GetReportListResponse.GetReportListResult);
+        }
+      });
+    })).pipe(
+      retryWhen(genericRetryStrategy({
+        scalingDuration: 3000,
+        includedStatusCodes: [503],
+        excludedStatusCodes: [404]
+      }))
+    )
+  });
+
+export const requestReportListNext$ = ({ props: { authfetch, reportList$ } }) =>
+  ({
+    reportListNext$: reportList$.pipe(
+      // tap(console.log),
+      expand(({ NextToken }) => NextToken ? reportListNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
+      concatMap(({ ReportInfo }) => ReportInfo ? typeof ReportInfo === 'string' ? [ReportInfo] : ReportInfo : empty()),
+    )
+  });
+
+
 export const requestReportResult$ = ({ props: { authfetch, requestedReportId$ } }) =>
   ({
     generatedReportId$: requestedReportId$.pipe(delay(30000), concatMap(reportResult$(authfetch)))
@@ -273,6 +328,7 @@ export const tsv2json$ = async ({ props: { report$, tsvSeperator = '\r\n' } }) =
 ({
   json$: report$.pipe(
     concatMap((tsv: string) => {
+      // console.log(tsv);
       const arr = tsv.split(tsvSeperator);
       const header = arr[0].split('\t');
       const rows$ = from(arr).pipe(skip(1), map(row => row.split('\t')));
@@ -331,3 +387,7 @@ export const subscribeReport = ({ props: { report$ } }) =>
     report$.subscribe(response => resolve({ response }));
   });
 
+export const subscribeReportList = ({ props: { reportListNext$ } }) =>
+  new Promise((resolve) => {
+    reportListNext$.pipe(toArray()).subscribe(response => resolve({ response }));
+  });

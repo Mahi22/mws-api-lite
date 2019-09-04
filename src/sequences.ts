@@ -8,14 +8,18 @@ import {
   fetchOrderListNext$,
   fetchOrderItems$,
   getReport$,
+  getReportById$,
   subscribeOrderItems,
   requestReport$,
+  requestReportList$,
+  requestReportListNext$,
   requestReportResult$,
   tsv2json$,
   xml2json$,
   // --
   subscribeJson,
-  subscribeReport
+  subscribeReport,
+  subscribeReportList
 } from './actions';
 
 export const Sequences = 'MWS_FUNCTION_TREE_SEQUENCES';
@@ -48,6 +52,20 @@ export const downloadTsvReport = sequence('Download TSV Report', [
   getReport$,
   tsv2json$,
   subscribeJson
+]);
+
+export const downloadTsvReportById = sequence('Download TSV Report By Id', [
+  createAmazonAuthfetch,
+  getReportById$,
+  tsv2json$,
+  subscribeJson
+]);
+
+export const downloadReportList = sequence('Download Report List', [
+  createAmazonAuthfetch,
+  requestReportList$,
+  requestReportListNext$,
+  subscribeReportList
 ]);
 
 export const downloadXmlReport = sequence('Download XML Report', [

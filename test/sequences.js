@@ -3,7 +3,7 @@ var FunctionTree = require('function-tree').FunctionTree;
 var moment = require('moment');
 var { toArray, map, flatten } = require('rxjs/operators');
 var Credentials = require('../credentials');
-var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport } = require('../nodejs/sequences');
+var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport, downloadReportList, downloadTsvReportById } = require('../nodejs/sequences');
 
 var FT = new FunctionTree();
 
@@ -47,6 +47,8 @@ describe('Sequence', () => {
       }
  */
 
+ /*
+
   step('sequence fetch order List', done => {
     FT.run(
       [
@@ -68,7 +70,6 @@ describe('Sequence', () => {
     )
   }).timeout(12000000)
 
-  /*
 
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     const StartDate = moment()
@@ -126,4 +127,35 @@ describe('Sequence', () => {
   //     }
   //   )
   // }).timeout(12000000);
+
+  step('sequence request', done => {
+    FT.run(
+      [
+        downloadReportList,
+        ({ props }) => {
+          console.log('-----');
+          console.log(props.response);
+          console.log(props.response[0].ReportId);
+          return { reportId: props.response[0].ReportId }
+          // done();
+        },
+        downloadTsvReportById,
+        ({ props }) => {
+          console.log('-----');
+          console.log(JSON.stringify(props.json));
+          done();
+        }
+      ],
+      {
+        credentials: Credentials,
+        requestReportParams: {
+          'ReportTypeList.Type.1': '_GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_',
+          AvailableFromDate: new Date('2019-08-24').toISOString()
+        },
+        tsvSeperator: '\n'
+      }
+    )
+  }).timeout(12000000);
+
+  
 });

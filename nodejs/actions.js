@@ -357,29 +357,32 @@ exports.subscribeJson = function (_a) {
 };
 exports.subscribeOrderItems = function (_a) {
     var orderItems$ = _a.props.orderItems$;
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
         var orderItems = [];
         orderItems$
-            .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }))
+            .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }), operators_1.catchError(function (err) { return rxjs_1.of(err); }))
             .subscribe({
             next: function (result) {
                 orderItems = result;
             },
             complete: function () {
                 resolve({ orderItems: orderItems });
+            },
+            error: function (err) {
+                reject(err);
             }
         });
     });
 };
 exports.subscribeReport = function (_a) {
     var report$ = _a.props.report$;
-    return new Promise(function (resolve) {
-        report$.subscribe(function (response) { return resolve({ response: response }); });
+    return new Promise(function (resolve, reject) {
+        report$.pipe(operators_1.catchError(function (err) { return rxjs_1.of(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(err); });
     });
 };
 exports.subscribeReportList = function (_a) {
     var reportListNext$ = _a.props.reportListNext$;
-    return new Promise(function (resolve) {
-        reportListNext$.pipe(operators_1.toArray()).subscribe(function (response) { return resolve({ response: response }); });
+    return new Promise(function (resolve, reject) {
+        reportListNext$.pipe(operators_1.toArray(), operators_1.catchError(function (err) { return rxjs_1.of(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(err); });
     });
 };

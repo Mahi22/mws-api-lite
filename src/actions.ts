@@ -1,6 +1,6 @@
 import { compose, tail, split, flatten } from 'ramda';
-import { from, throwError, timer, empty } from 'rxjs';
-import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip } from 'rxjs/operators';
+import { from, throwError, timer, empty, of } from 'rxjs';
+import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catchError } from 'rxjs/operators';
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
@@ -371,7 +371,9 @@ export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
     orderItems$
       .pipe(
         toArray(),
-        map(arr => flatten(arr)))
+        map(arr => flatten(arr)),
+        catchError(err => of(err))
+      )
       .subscribe({
         next: result => {
           orderItems = result;
@@ -387,10 +389,10 @@ export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
 
 export const subscribeReport = ({ props: { report$ } }) =>
   new Promise((resolve, reject) => {
-    report$.subscribe(response => resolve({ response }), err => reject(err));
+    report$.pipe(catchError(err => of(err))).subscribe(response => resolve({ response }), err => reject(err));
   });
 
 export const subscribeReportList = ({ props: { reportListNext$ } }) =>
   new Promise((resolve, reject) => {
-    reportListNext$.pipe(toArray()).subscribe(response => resolve({ response }), err => reject(err));
+    reportListNext$.pipe(toArray(), catchError(err => of(err))).subscribe(response => resolve({ response }), err => reject(err));
   });

@@ -47,8 +47,6 @@ describe('Sequence', () => {
       }
  */
 
- /*
-
   step('sequence fetch order List', done => {
     FT.run(
       [
@@ -62,15 +60,19 @@ describe('Sequence', () => {
       ],
       {
         fetchOrderListParams: {
-          CreatedAfter: moment().subtract(0, 'days').toISOString(),
+          CreatedAfter: moment().subtract(3, 'days').toISOString(),
+          CreatedBefore: moment().subtract(0, 'days').toISOString(),
           'MarketplaceId.Id': Credentials.marketplaceId
         },
         credentials: Credentials
       }
-    )
+    ).catch(err => {
+      console.log('Error CAUGHT');
+      console.log(err);
+    })
   }).timeout(12000000)
 
-
+ /*
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     const StartDate = moment()
       .subtract(1, 'days')
@@ -128,34 +130,34 @@ describe('Sequence', () => {
   //   )
   // }).timeout(12000000);
 
-  step('sequence request', done => {
-    FT.run(
-      [
-        downloadReportList,
-        ({ props }) => {
-          console.log('-----');
-          console.log(props.response);
-          console.log(props.response[0].ReportId);
-          return { reportId: props.response[0].ReportId }
-          // done();
-        },
-        downloadTsvReportById,
-        ({ props }) => {
-          console.log('-----');
-          console.log(JSON.stringify(props.json));
-          done();
-        }
-      ],
-      {
-        credentials: Credentials,
-        requestReportParams: {
-          'ReportTypeList.Type.1': '_GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_',
-          AvailableFromDate: new Date('2019-08-24').toISOString()
-        },
-        tsvSeperator: '\n'
-      }
-    )
-  }).timeout(12000000);
+  // step('sequence request', done => {
+  //   FT.run(
+  //     [
+  //       downloadReportList,
+  //       ({ props }) => {
+  //         console.log('-----');
+  //         console.log(props.response);
+  //         console.log(props.response[0].ReportId);
+  //         return { reportId: props.response[0].ReportId }
+  //         // done();
+  //       },
+  //       downloadTsvReportById,
+  //       ({ props }) => {
+  //         console.log('-----');
+  //         console.log(JSON.stringify(props.json));
+  //         done();
+  //       }
+  //     ],
+  //     {
+  //       credentials: Credentials,
+  //       requestReportParams: {
+  //         'ReportTypeList.Type.1': '_GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_',
+  //         AvailableFromDate: new Date('2019-08-24').toISOString()
+  //       },
+  //       tsvSeperator: '\n'
+  //     }
+  //   )
+  // }).timeout(12000000);
 
   
 });

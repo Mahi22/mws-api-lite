@@ -69,6 +69,7 @@ describe('Sequence', () => {
     ).catch(err => {
       console.log('Error CAUGHT');
       console.log(err);
+      done();
     })
   }).timeout(12000000)
 

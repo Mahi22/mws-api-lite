@@ -360,7 +360,7 @@ exports.subscribeOrderItems = function (_a) {
     return new Promise(function (resolve, reject) {
         var orderItems = [];
         orderItems$
-            .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }), operators_1.catchError(function (err) { return rxjs_1.of(err); }))
+            .pipe(operators_1.toArray(), operators_1.map(function (arr) { return ramda_1.flatten(arr); }), operators_1.catchError(function (err) { return Promise.reject(err); }))
             .subscribe({
             next: function (result) {
                 orderItems = result;
@@ -369,7 +369,7 @@ exports.subscribeOrderItems = function (_a) {
                 resolve({ orderItems: orderItems });
             },
             error: function (err) {
-                reject(err);
+                reject(new Error(JSON.stringify(err)));
             }
         });
     });
@@ -377,12 +377,12 @@ exports.subscribeOrderItems = function (_a) {
 exports.subscribeReport = function (_a) {
     var report$ = _a.props.report$;
     return new Promise(function (resolve, reject) {
-        report$.pipe(operators_1.catchError(function (err) { return rxjs_1.of(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(err); });
+        report$.pipe(operators_1.catchError(function (err) { return Promise.reject(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(new Error(JSON.stringify(err))); });
     });
 };
 exports.subscribeReportList = function (_a) {
     var reportListNext$ = _a.props.reportListNext$;
     return new Promise(function (resolve, reject) {
-        reportListNext$.pipe(operators_1.toArray(), operators_1.catchError(function (err) { return rxjs_1.of(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(err); });
+        reportListNext$.pipe(operators_1.toArray(), operators_1.catchError(function (err) { return Promise.reject(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(new Error(JSON.stringify(err))); });
     });
 };

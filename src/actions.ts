@@ -372,27 +372,31 @@ export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
       .pipe(
         toArray(),
         map(arr => flatten(arr)),
-        catchError(err => of(err))
+        catchError(err => Promise.reject(err))
       )
       .subscribe({
         next: result => {
+          // console.log('NEXT CALLED');
           orderItems = result;
         },
         complete: () => {
+          // console.log('COMPLETED');
           resolve({ orderItems });
         },
         error: err => {
-          reject(err);
+          // console.log('CAUGHT ERRROR');
+          // console.log(err);
+          reject(new Error(JSON.stringify(err)));
         }
       });
   });
 
 export const subscribeReport = ({ props: { report$ } }) =>
   new Promise((resolve, reject) => {
-    report$.pipe(catchError(err => of(err))).subscribe(response => resolve({ response }), err => reject(err));
+    report$.pipe(catchError(err => Promise.reject(err))).subscribe(response => resolve({ response }), err => reject(new Error(JSON.stringify(err))));
   });
 
 export const subscribeReportList = ({ props: { reportListNext$ } }) =>
   new Promise((resolve, reject) => {
-    reportListNext$.pipe(toArray(), catchError(err => of(err))).subscribe(response => resolve({ response }), err => reject(err));
+    reportListNext$.pipe(toArray(), catchError(err => Promise.reject(err))).subscribe(response => resolve({ response }), err => reject(new Error(JSON.stringify(err))));
   });

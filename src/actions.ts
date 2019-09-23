@@ -366,7 +366,7 @@ export const subscribeJson = async ({ props: { json$ } }) =>
 
 
 export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
-  new Promise((resolve) => {
+  new Promise((resolve, reject) => {
     let orderItems = [];
     orderItems$
       .pipe(
@@ -378,16 +378,19 @@ export const subscribeOrderItems = ({ props: { orderItems$ } }) =>
         },
         complete: () => {
           resolve({ orderItems });
+        },
+        error: err => {
+          reject(err);
         }
       });
   });
 
 export const subscribeReport = ({ props: { report$ } }) =>
-  new Promise((resolve) => {
-    report$.subscribe(response => resolve({ response }));
+  new Promise((resolve, reject) => {
+    report$.subscribe(response => resolve({ response }), err => reject(err));
   });
 
 export const subscribeReportList = ({ props: { reportListNext$ } }) =>
-  new Promise((resolve) => {
-    reportListNext$.pipe(toArray()).subscribe(response => resolve({ response }));
+  new Promise((resolve, reject) => {
+    reportListNext$.pipe(toArray()).subscribe(response => resolve({ response }), err => reject(err));
   });

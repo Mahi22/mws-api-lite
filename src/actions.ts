@@ -4,6 +4,8 @@ import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catc
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
+const retry = require('retry');
+
 /*
  * ----
  * Helper Utilities
@@ -27,9 +29,31 @@ const genericRetryStrategy = ({
         return throwError(error);
       }
 
+      // console.log(retryAttempt);
+      // console.log(scalingDuration);
+      // console.log(retryAttempt * scalingDuration);
+
       return timer(retryAttempt * scalingDuration);
     })
   )
+};
+
+const retryStrategyShort = {
+  retries: 6,
+  factor: 3,
+  minTimeout: 2 * 1000
+};
+
+const retryStrategyMedium = {
+  retries: 8,
+  factor: 4,
+  minTimeout: 2 * 1000
+};
+
+const retryStrategyLong = {
+  retries: 10,
+  factor: 5,
+  minTimeout: 2 * 1000
 };
 
 /*
@@ -78,43 +102,92 @@ new Promise((resolve, reject) => {
  * Observer Functions
  * ----
  */
+// const downloadReport$ = authfetch => reportId =>
+//   from(new Promise((resolve, reject) => {
+//     if (reportId === null) {
+//       resolve('');
+//     } else {
+//       authfetch.GetReport({ ReportId: reportId }, (error, response) => {
+//         if (error) {
+//           reject(error);
+//         } else {
+//           // console.log('GOT DOWNLOAD RESPONSE');
+//           resolve(response.body);
+//         }
+//       });
+//     }
+//   })).pipe(
+//     retryWhen(genericRetryStrategy({
+//       scalingDuration: 60000,
+//       includedStatusCodes: [503],
+//       excludedStatusCodes: [404]
+//     }))
+//   );
 const downloadReport$ = authfetch => reportId =>
   from(new Promise((resolve, reject) => {
     if (reportId === null) {
       resolve('');
     } else {
-      authfetch.GetReport({ ReportId: reportId }, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          // console.log('GOT DOWNLOAD RESPONSE');
-          resolve(response.body);
-        }
+      var operation = retry.operation(retryStrategyLong);
+
+      operation.attempt(function() {
+        authfetch.GetReport({ ReportId: reportId }, (error, response) => {
+          if (error) {
+            if (operation.retry(error)) {
+              return;
+            }
+            reject(error);
+          } else {
+            // console.log('GOT DOWNLOAD RESPONSE');
+            resolve(response.body);
+          }
+        });
       });
     }
-  })).pipe(
-    retryWhen(genericRetryStrategy({
-      scalingDuration: 60000,
-      includedStatusCodes: [503],
-      excludedStatusCodes: [404]
-    }))
-  );
+  }));
+
+// const orderItems$ = authfetch => orderId =>
+//   from(new Promise((resolve, reject) => {
+//     console.log('FETCHING');
+//     console.log(retry);
+//     authfetch.ListOrderItems(orderId, (error, response) => {
+//       console.log(orderId);
+//       if (error) {
+//         console.log(error);
+//         reject(error)
+//       } else {
+//         console.log('resolved');
+//         resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
+//       }
+//     })
+//   })).pipe(
+//     retryWhen(genericRetryStrategy({
+//       scalingDuration: 30000,
+//       includedStatusCodes: [503]
+//     }))
+//   );
 
 const orderItems$ = authfetch => orderId =>
-  from(new Promise((resolve, reject) => {
-    authfetch.ListOrderItems(orderId, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
-      }
-    })
-  })).pipe(
-    retryWhen(genericRetryStrategy({
-      scalingDuration: 30000,
-      includedStatusCodes: [503]
-    }))
-  );
+    from(new Promise((resolve, reject) => {
+      var operation = retry.operation(retryStrategyShort);
+
+      operation.attempt(function() {
+        authfetch.ListOrderItems(orderId, (error, response) => {
+          console.log(orderId);
+          if (error) {
+            console.log(error);
+            if (operation.retry(error)) {
+              return;
+            }
+            reject(error);
+          } else {
+            console.log('resolved');
+            resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
+          }
+        })
+      });
+    }));
+
 
 // const orderItemsNext$ = authfetch => NextToken =>
 //   from(new Promise((resolve, reject) => {
@@ -134,75 +207,157 @@ const orderItems$ = authfetch => orderId =>
 //     }))
 //   );
 
+// const orderListNext$ = authfetch => NextToken =>
+//   from(new Promise((resolve, reject) => {
+//     authfetch.ListOrdersByNextToken({
+//       NextToken
+//     }, (error, response) => {
+//       if (error) {
+//         reject(error)
+//       } else {
+//         resolve((parser.parse(response.body)).ListOrdersByNextTokenResponse.ListOrdersByNextTokenResult);
+//       }
+//     })
+//   })).pipe(
+//     retryWhen(genericRetryStrategy({
+//       scalingDuration: 30000,
+//       includedStatusCodes: [503]
+//     }))
+//   );
+
 const orderListNext$ = authfetch => NextToken =>
   from(new Promise((resolve, reject) => {
-    authfetch.ListOrdersByNextToken({
-      NextToken
-    }, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve((parser.parse(response.body)).ListOrdersByNextTokenResponse.ListOrdersByNextTokenResult);
-      }
-    })
-  })).pipe(
-    retryWhen(genericRetryStrategy({
-      scalingDuration: 30000,
-      includedStatusCodes: [503]
-    }))
-  );
+    var operation = retry.operation(retryStrategyShort);
+
+    operation.attempt(function() {
+      authfetch.ListOrdersByNextToken({
+        NextToken
+      }, (error, response) => {
+        if (error) {
+          if (operation.retry(error)) {
+            return;
+          }
+          reject(error)
+        } else {
+          resolve((parser.parse(response.body)).ListOrdersByNextTokenResponse.ListOrdersByNextTokenResult);
+        }
+      })
+    });
+  }));
+
+// const reportListNext$ = authfetch => NextToken =>
+//   from(new Promise((resolve, reject) => {
+//     // console.log('REQUESTION REPORT');
+//     authfetch.GetReportListByNextToken({
+//       NextToken
+//     }, (error, response) => {
+//       if (error) {
+//         reject(error)
+//       } else {
+//         resolve((parser.parse(response.body)).GetReportListByNextTokenResponse.GetReportListByNextTokenResult);
+//       }
+//     })
+//   })).pipe(
+//     retryWhen(genericRetryStrategy({
+//       scalingDuration: 30000,
+//       includedStatusCodes: [503]
+//     }))
+//   );
 
 const reportListNext$ = authfetch => NextToken =>
   from(new Promise((resolve, reject) => {
     // console.log('REQUESTION REPORT');
-    authfetch.GetReportListByNextToken({
-      NextToken
-    }, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve((parser.parse(response.body)).GetReportListByNextTokenResponse.GetReportListByNextTokenResult);
-      }
-    })
-  })).pipe(
-    retryWhen(genericRetryStrategy({
-      scalingDuration: 30000,
-      includedStatusCodes: [503]
-    }))
-  );
+    var operation = retry.operation(retryStrategyMedium);
+
+    operation.attempt(function() {
+      authfetch.GetReportListByNextToken({
+        NextToken
+      }, (error, response) => {
+        if (error) {
+          if (operation.retry(error)) {
+            return;
+          }
+          reject(error);
+        } else {
+          resolve((parser.parse(response.body)).GetReportListByNextTokenResponse.GetReportListByNextTokenResult);
+        }
+      });
+    });
+  }));
+
+// const reportResult$ = authfetch => reportId =>
+//   from(new Promise((resolve, reject) => {
+//     authfetch.GetReportRequestList({'ReportRequestIdList.Id.1': reportId }, (error, res) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         const response = parser.parse(res.body, { parseTrueNumberOnly: true });
+//         if (
+//           response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+//             .ReportProcessingStatus === '_DONE_'
+//         ) {
+//           resolve(response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo.GeneratedReportId);
+//         } else if (
+//           response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+//               .ReportProcessingStatus === '_DONE_NO_DATA_'
+//         ) {
+//           resolve(null);
+//         } else {
+//           reject({
+//             status: 555,
+//             message: response 
+//           });
+//         }
+//       }
+//     });
+//   })).pipe(
+//   retryWhen(genericRetryStrategy({
+//     scalingDuration: 60000,
+//     includedStatusCodes: [503, 555],
+//     excludedStatusCodes: [404]
+//   }))
+// );
 
 const reportResult$ = authfetch => reportId =>
   from(new Promise((resolve, reject) => {
-    authfetch.GetReportRequestList({'ReportRequestIdList.Id.1': reportId }, (error, res) => {
-      if (error) {
-        reject(error);
-      } else {
-        const response = parser.parse(res.body, { parseTrueNumberOnly: true });
-        if (
-          response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
-            .ReportProcessingStatus === '_DONE_'
-        ) {
-          resolve(response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo.GeneratedReportId);
-        } else if (
-          response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
-              .ReportProcessingStatus === '_DONE_NO_DATA_'
-        ) {
-          resolve(null);
+    var operation = retry.operation(retryStrategyMedium);
+
+    operation.attempt(function() {
+      authfetch.GetReportRequestList({'ReportRequestIdList.Id.1': reportId }, (error, res) => {
+        if (error) {
+          if (operation.retry(error)) {
+            return;
+          }
+          reject(error);
         } else {
-          reject({
-            status: 555,
-            message: response 
-          });
+          const response = parser.parse(res.body, { parseTrueNumberOnly: true });
+          // console.log(JSON.stringify(response));
+          if (
+            response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+              .ReportProcessingStatus === '_DONE_'
+          ) {
+            resolve(response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo.GeneratedReportId);
+          } else if (
+            response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+                .ReportProcessingStatus === '_DONE_NO_DATA_'
+          ) {
+            resolve(null);
+          } else {
+            if (operation.retry({
+              status: 555,
+              message: response 
+            })) {
+              return;
+            }
+            reject({
+              status: 555,
+              message: response 
+            });
+          }
         }
-      }
+      });
     });
-  })).pipe(
-  retryWhen(genericRetryStrategy({
-    scalingDuration: 60000,
-    includedStatusCodes: [503, 555],
-    excludedStatusCodes: [404]
-  }))
-);
+  }));
 
 /*
  * ---- 
@@ -232,29 +387,52 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
 //     )
 //   });
 
+// export const fetchOrderList$ = async ({ props: { authfetch, fetchOrderListParams } }) =>
+//   ({
+//     orderList$: from(new Promise((resolve, reject) => {
+//       authfetch.ListOrders(fetchOrderListParams, (error, response) => {
+//         if (error) {
+//           reject(error);
+//         } else {
+//           resolve((parser.parse(response.body)).ListOrdersResponse.ListOrdersResult);
+//         }
+//       });
+//     })).pipe(
+//       retryWhen(genericRetryStrategy({
+//         scalingDuration: 3000,
+//         includedStatusCodes: [503]
+//       }))
+//     )
+//   });
+
 export const fetchOrderList$ = async ({ props: { authfetch, fetchOrderListParams } }) =>
   ({
     orderList$: from(new Promise((resolve, reject) => {
-      authfetch.ListOrders(fetchOrderListParams, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve((parser.parse(response.body)).ListOrdersResponse.ListOrdersResult);
-        }
+      var operation = retry.operation(retryStrategyShort);
+
+      operation.attempt(function() {
+        authfetch.ListOrders(fetchOrderListParams, (error, response) => {
+          if (error) {
+            if (operation.retry(error)) {
+              return;
+            }
+            reject(error);
+          } else {
+            resolve((parser.parse(response.body)).ListOrdersResponse.ListOrdersResult);
+          }
+        });
       });
-    })).pipe(
-      retryWhen(genericRetryStrategy({
-        scalingDuration: 3000,
-        includedStatusCodes: [503]
-      }))
-    )
+    }))
   });
 
 export const fetchOrderListNext$ = ({ props: { authfetch, orderList$ } }) =>
   ({
     orderListNext$: orderList$.pipe(
+      // tap(console.log),
+      // tap(() => { console.log('*****') }),
       expand(({ NextToken }) => NextToken ? orderListNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
       concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
+      // tap(console.log)
       // toArray()
     )
   });
@@ -271,42 +449,82 @@ export const getReportById$ = ({ props: { authfetch, reportId } }) => {
 };
 
 
+// export const requestReport$ = ({ props: { authfetch, requestReportParams } }) =>
+//   ({
+//     requestedReportId$: from(new Promise((resolve, reject) => {
+//       authfetch.RequestReport(requestReportParams, (error, response) => {
+//         if (error) {
+//           reject(error);
+//         } else {
+//           resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).RequestReportResponse.RequestReportResult.ReportRequestInfo.ReportRequestId);
+//         }
+//       });
+//     })).pipe(
+//       retryWhen(genericRetryStrategy({
+//         scalingDuration: 3000,
+//         includedStatusCodes: [503],
+//         excludedStatusCodes: [404]
+//       }))
+//     )
+//   });
+
 export const requestReport$ = ({ props: { authfetch, requestReportParams } }) =>
   ({
     requestedReportId$: from(new Promise((resolve, reject) => {
-      authfetch.RequestReport(requestReportParams, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).RequestReportResponse.RequestReportResult.ReportRequestInfo.ReportRequestId);
-        }
+      var operation = retry.operation(retryStrategyShort);
+
+      operation.attempt(function() {
+        authfetch.RequestReport(requestReportParams, (error, response) => {
+          if (error) {
+            if (operation.retry(error)) {
+              return;
+            }
+            reject(error);
+          } else {
+            resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).RequestReportResponse.RequestReportResult.ReportRequestInfo.ReportRequestId);
+          }
+        });
       });
-    })).pipe(
-      retryWhen(genericRetryStrategy({
-        scalingDuration: 3000,
-        includedStatusCodes: [503],
-        excludedStatusCodes: [404]
-      }))
-    )
-  });
+    }))
+  });  
+
+// export const requestReportList$ = ({ props: { authfetch, requestReportParams } }) =>
+//   ({
+//     reportList$: from(new Promise((resolve, reject) => {
+//       authfetch.GetReportList(requestReportParams, (error, response) => {
+//         if (error) {
+//           reject(error);
+//         } else {
+//           resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).GetReportListResponse.GetReportListResult);
+//         }
+//       });
+//     })).pipe(
+//       retryWhen(genericRetryStrategy({
+//         scalingDuration: 3000,
+//         includedStatusCodes: [503],
+//         excludedStatusCodes: [404]
+//       }))
+//     )
+//   });
 
 export const requestReportList$ = ({ props: { authfetch, requestReportParams } }) =>
   ({
     reportList$: from(new Promise((resolve, reject) => {
-      authfetch.GetReportList(requestReportParams, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).GetReportListResponse.GetReportListResult);
-        }
+      var operation = retry.operation(retryStrategyShort);
+
+      operation.attempt(function() {
+        authfetch.GetReportList(requestReportParams, (error, response) => {
+          if (error) {
+            if (operation.retry(error)) {
+              return;
+            }
+            reject(error);
+          } else {
+            resolve((parser.parse(response.body, { parseTrueNumberOnly: true })).GetReportListResponse.GetReportListResult);
+          }
+        });
       });
-    })).pipe(
-      retryWhen(genericRetryStrategy({
-        scalingDuration: 3000,
-        includedStatusCodes: [503],
-        excludedStatusCodes: [404]
-      }))
-    )
+    }))
   });
 
 export const requestReportListNext$ = ({ props: { authfetch, reportList$ } }) =>

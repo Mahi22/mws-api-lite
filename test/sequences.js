@@ -3,7 +3,7 @@ var FunctionTree = require('function-tree').FunctionTree;
 var moment = require('moment');
 var { toArray, map, flatten } = require('rxjs/operators');
 var Credentials = require('../credentials');
-var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport, downloadReportList, downloadTsvReportById } = require('../nodejs/sequences');
+var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport, downloadReportList, downloadTsvReportById, downloadXmlReport } = require('../nodejs/sequences');
 
 var FT = new FunctionTree();
 
@@ -45,7 +45,6 @@ describe('Sequence', () => {
           .toISOString(),
         'MarketplaceId.Id': credentials.marketplaceId
       }
- */
 
   step('sequence fetch order List', done => {
     FT.run(
@@ -60,8 +59,8 @@ describe('Sequence', () => {
       ],
       {
         fetchOrderListParams: {
-          CreatedAfter: moment().subtract(3, 'days').toISOString(),
-          CreatedBefore: moment().subtract(0, 'days').toISOString(),
+          CreatedAfter: '2019-09-01T13:58:49.394Z',
+          // CreatedBefore: moment().subtract(0, 'days').toISOString(),
           'MarketplaceId.Id': Credentials.marketplaceId
         },
         credentials: Credentials
@@ -73,7 +72,7 @@ describe('Sequence', () => {
     })
   }).timeout(12000000)
 
- /*
+
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     const StartDate = moment()
       .subtract(1, 'days')
@@ -103,33 +102,32 @@ describe('Sequence', () => {
       }
     )
   }).timeout(12000000);
+   */
 
-  */
+  step('sequence request Report XML RETURNS DATA Report', done => {
+    const StartDate = moment()
+      .subtract(10, 'days')
+      .startOf('day')
+      .toISOString();
 
-  // step('sequence request Report XML RETURNS DATA Report', done => {
-  //   const StartDate = moment()
-  //     .subtract(30, 'days')
-  //     .startOf('day')
-  //     .toISOString();
-
-  //   FT.run(
-  //     [
-  //       downloadTsvReport,
-  //       ({ props }) => {
-  //         console.log('-----');
-  //         console.log(props.json);
-  //         done();
-  //       }
-  //     ],
-  //     {
-  //       credentials: Credentials,
-  //       requestReportParams: {
-  //         ReportType: '_GET_XML_RETURNS_DATA_BY_RETURN_DATE_',
-  //         StartDate
-  //       }
-  //     }
-  //   )
-  // }).timeout(12000000);
+    FT.run(
+      [
+        downloadXmlReport,
+        ({ props }) => {
+          console.log('-----');
+          console.log(JSON.stringify(props.json));
+          done();
+        }
+      ],
+      {
+        credentials: Credentials,
+        requestReportParams: {
+          ReportType: '_GET_XML_RETURNS_DATA_BY_RETURN_DATE_',
+          StartDate
+        }
+      }
+    )
+  }).timeout(12000000);
 
   // step('sequence request', done => {
   //   FT.run(

@@ -173,15 +173,15 @@ const orderItems$ = authfetch => orderId =>
 
       operation.attempt(function() {
         authfetch.ListOrderItems(orderId, (error, response) => {
-          console.log(orderId);
+          // console.log(orderId);
           if (error) {
-            console.log(error);
+            // console.log(error);
             if (operation.retry(error)) {
               return;
             }
             reject(error);
           } else {
-            console.log('resolved');
+            // console.log('resolved');
             resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
           }
         })

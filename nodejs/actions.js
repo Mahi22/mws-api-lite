@@ -138,16 +138,13 @@ var orderItems$ = function (authfetch) { return function (orderId) {
         var operation = retry.operation(retryStrategyShort);
         operation.attempt(function () {
             authfetch.ListOrderItems(orderId, function (error, response) {
-                console.log(orderId);
                 if (error) {
-                    console.log(error);
                     if (operation.retry(error)) {
                         return;
                     }
                     reject(error);
                 }
                 else {
-                    console.log('resolved');
                     resolve((parser.parse(response.body)).ListOrderItemsResponse.ListOrderItemsResult);
                 }
             });

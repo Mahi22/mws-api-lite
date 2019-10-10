@@ -368,6 +368,7 @@ const reportResult$ = authfetch => reportId =>
 export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
   ({
     orderItems$: orderListNext$.pipe(
+      delay(900),
       concatMap(({ AmazonOrderId }) => orderItems$(authfetch)({ AmazonOrderId }), (order, { OrderItems }) => {
         if (Array.isArray(OrderItems.OrderItem)) {
           return OrderItems.OrderItem.map(item => ({ ...order, item }));

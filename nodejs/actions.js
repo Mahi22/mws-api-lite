@@ -232,7 +232,7 @@ var reportResult$ = function (authfetch) { return function (reportId) {
 exports.fetchOrderItems$ = function (_a) {
     var _b = _a.props, authfetch = _b.authfetch, orderListNext$ = _b.orderListNext$;
     return ({
-        orderItems$: orderListNext$.pipe(operators_1.concatMap(function (_a) {
+        orderItems$: orderListNext$.pipe(operators_1.delay(900), operators_1.concatMap(function (_a) {
             var AmazonOrderId = _a.AmazonOrderId;
             return orderItems$(authfetch)({ AmazonOrderId: AmazonOrderId });
         }, function (order, _a) {

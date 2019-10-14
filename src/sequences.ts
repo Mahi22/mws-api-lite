@@ -34,7 +34,7 @@ export const fetchAmazonOrders = sequence('Fetching Amazon Orders', [
   fetchOrderList$,
   fetchOrderListNext$,
   fetchOrderItems$,
-  subscribeOrderItems
+  // subscribeOrderItems
 ]);
 
 export const downloadReport = sequence('Download Report', [
@@ -42,7 +42,7 @@ export const downloadReport = sequence('Download Report', [
   requestReport$,
   requestReportResult$,
   getReport$,
-  subscribeReport
+  // subscribeReport
 ]);
 
 export const downloadTsvReport = sequence('Download TSV Report', [
@@ -51,21 +51,21 @@ export const downloadTsvReport = sequence('Download TSV Report', [
   requestReportResult$,
   getReport$,
   tsv2json$,
-  subscribeJson
+  // subscribeJson
 ]);
 
 export const downloadTsvReportById = sequence('Download TSV Report By Id', [
   createAmazonAuthfetch,
   getReportById$,
   tsv2json$,
-  subscribeJson
+  // subscribeJson
 ]);
 
 export const downloadReportList = sequence('Download Report List', [
   createAmazonAuthfetch,
   requestReportList$,
   requestReportListNext$,
-  subscribeReportList
+  // subscribeReportList
 ]);
 
 export const downloadXmlReport = sequence('Download XML Report', [
@@ -74,5 +74,5 @@ export const downloadXmlReport = sequence('Download XML Report', [
   requestReportResult$,
   getReport$,
   xml2json$,
-  subscribeJson
+  // subscribeJson
 ]);

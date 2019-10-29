@@ -234,10 +234,7 @@ exports.createAmazonOrderIdsBatch$ = function (_a) {
     return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_b) {
             return [2, ({
-                    orderIdsBatch$: orderIds$.pipe(operators_1.bufferCount(50), operators_1.tap(function (val) {
-                        console.log('CREATED ARRAY');
-                        console.log(val);
-                    }))
+                    orderIdsBatch$: orderIds$.pipe(operators_1.bufferCount(50))
                 })];
         });
     });
@@ -256,9 +253,6 @@ exports.fetchOrderItems$ = function (_a) {
             else {
                 return [__assign({}, order, { item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId })];
             }
-        }), operators_1.tap(function (res) {
-            console.log('GOT RESULT');
-            console.log(res);
         }))
     });
 };
@@ -308,12 +302,8 @@ exports.fetchOrderIdsBatch$ = function (_a) {
                 var _a;
                 return (__assign({}, acc, (_a = {}, _a["AmazonOrderId.Id." + (index + 1)] = curr, _a)));
             }, {});
-            console.log('FETCHING');
-            console.log(rqstIds);
             operation.attempt(function () {
                 authfetch.GetOrder(rqstIds, function (error, response) {
-                    console.log('GOT RESPONSE');
-                    console.log(response);
                     if (error) {
                         if (operation.retry(error)) {
                             return;
@@ -325,12 +315,12 @@ exports.fetchOrderIdsBatch$ = function (_a) {
                     }
                 });
             });
-        })); }), operators_1.tap(function (val) {
-            console.log('Parsed Values');
-            console.log(val);
-        }), operators_1.concatMap(function (_a) {
+        })); }), operators_1.concatMap(function (_a) {
             var Orders = _a.Orders;
-            return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
+            if (Orders) {
+                return Array.isArray(Orders.Order) ? Orders.Order : [Orders.Order];
+            }
+            return rxjs_1.empty();
         }))
     });
 };

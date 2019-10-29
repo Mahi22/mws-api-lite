@@ -369,10 +369,10 @@ const reportResult$ = authfetch => reportId =>
 export const createAmazonOrderIdsBatch$ = async ({ props: { orderIds$ } }) => ({
   orderIdsBatch$: orderIds$.pipe(
     bufferCount(50),
-    tap(val => {
-      console.log('CREATED ARRAY');
-      console.log(val);
-    })
+    // tap(val => {
+    //   console.log('CREATED ARRAY');
+    //   console.log(val);
+    // })
   )
 });
 
@@ -386,11 +386,11 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
         } else {
           return [{ ...order, item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId }];
         }
-      }),
-      tap(res => {
-        console.log('GOT RESULT');
-        console.log(res);
       })
+      // tap(res => {
+      //   console.log('GOT RESULT');
+      //   console.log(res);
+      // })
     )
   });
 
@@ -461,13 +461,8 @@ export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
 
         const rqstIds = orderIdsBatch.reduce((acc, curr, index) => ({ ...acc, [`AmazonOrderId.Id.${index + 1}`]: curr }), {});
 
-        console.log('FETCHING');
-        console.log(rqstIds);
-
         operation.attempt(function() {
           authfetch.GetOrder(rqstIds, (error, response) => {
-            console.log('GOT RESPONSE');
-            console.log(response);
             if (error) {
               if (operation.retry(error)) {
                 return;
@@ -479,12 +474,17 @@ export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
           });
         });
       }))),
-      tap(val => {
-        console.log('Parsed Values');
-        console.log(val);
-        // console.log(typeof val.Orders.Order);
+      // tap(val => {
+      //   console.log('Parsed Values');
+      //   console.log(val);
+      //   // console.log(typeof val.Orders.Order);
+      // }),
+      concatMap(({ Orders }) => {
+        if (Orders) {
+          return Array.isArray(Orders.Order) ? Orders.Order : [Orders.Order];
+        }
+        return empty();
       }),
-      concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
     )
   });
 

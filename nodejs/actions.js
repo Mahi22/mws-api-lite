@@ -325,7 +325,10 @@ exports.fetchOrderIdsBatch$ = function (_a) {
                     }
                 });
             });
-        })); }), operators_1.concatMap(function (_a) {
+        })); }), operators_1.tap(function (val) {
+            console.log('Parsed Values');
+            console.log(val);
+        }), operators_1.concatMap(function (_a) {
             var Orders = _a.Orders;
             return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
         }))

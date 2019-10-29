@@ -479,6 +479,11 @@ export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
           });
         });
       }))),
+      tap(val => {
+        console.log('Parsed Values');
+        console.log(val);
+        // console.log(typeof val.Orders.Order);
+      }),
       concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
     )
   });

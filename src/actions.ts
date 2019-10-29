@@ -457,6 +457,9 @@ export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
 
         const rqstIds = orderIdsBatch.reduce((acc, curr, index) => ({ ...acc, [`AmazonOrderId.Id.${index + 1}`]: curr }), {});
 
+        console.log('FETCHING');
+        console.log(rqstIds);
+
         operation.attempt(function() {
           authfetch.GetOrder(rqstIds, (error, response) => {
             if (error) {

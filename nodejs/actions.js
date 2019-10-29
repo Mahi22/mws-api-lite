@@ -305,6 +305,8 @@ exports.fetchOrderIdsBatch$ = function (_a) {
                 var _a;
                 return (__assign({}, acc, (_a = {}, _a["AmazonOrderId.Id." + (index + 1)] = curr, _a)));
             }, {});
+            console.log('FETCHING');
+            console.log(rqstIds);
             operation.attempt(function () {
                 authfetch.GetOrder(rqstIds, function (error, response) {
                     if (error) {

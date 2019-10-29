@@ -256,6 +256,9 @@ exports.fetchOrderItems$ = function (_a) {
             else {
                 return [__assign({}, order, { item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId })];
             }
+        }), operators_1.tap(function (res) {
+            console.log('GOT RESULT');
+            console.log(res);
         }))
     });
 };

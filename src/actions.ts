@@ -387,6 +387,10 @@ export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
           return [{ ...order, item: OrderItems.OrderItem, orderItemId: OrderItems.OrderItem.OrderItemId }];
         }
       }),
+      tap(res => {
+        console.log('GOT RESULT');
+        console.log(res);
+      })
     )
   });
 

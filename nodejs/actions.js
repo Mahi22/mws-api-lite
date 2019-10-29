@@ -312,6 +312,8 @@ exports.fetchOrderIdsBatch$ = function (_a) {
             console.log(rqstIds);
             operation.attempt(function () {
                 authfetch.GetOrder(rqstIds, function (error, response) {
+                    console.log('GOT RESPONSE');
+                    console.log(response);
                     if (error) {
                         if (operation.retry(error)) {
                             return;

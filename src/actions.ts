@@ -466,6 +466,8 @@ export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
 
         operation.attempt(function() {
           authfetch.GetOrder(rqstIds, (error, response) => {
+            console.log('GOT RESPONSE');
+            console.log(response);
             if (error) {
               if (operation.retry(error)) {
                 return;

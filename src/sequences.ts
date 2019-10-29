@@ -4,9 +4,11 @@ import {
   createAmazonAuthfetch,
   checkOrderServiceStatus,
   // --
+  createAmazonOrderIdsBatch$,
   fetchOrderList$,
   fetchOrderListNext$,
   fetchOrderItems$,
+  fetchOrderIdsBatch$,
   getReport$,
   getReportById$,
   subscribeOrderItems,
@@ -35,6 +37,13 @@ export const fetchAmazonOrders = sequence('Fetching Amazon Orders', [
   fetchOrderListNext$,
   fetchOrderItems$,
   // subscribeOrderItems
+]);
+
+export const fetchAmazonOrdersByOrderIds = sequence('Fetching Amazon Order By OrderIds', [
+  createAmazonAuthfetch,
+  createAmazonOrderIdsBatch$,
+  fetchOrderIdsBatch$,
+  fetchOrderItems$
 ]);
 
 export const downloadReport = sequence('Download Report', [

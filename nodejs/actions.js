@@ -78,16 +78,6 @@ var retryStrategyLong = {
     factor: 5,
     minTimeout: 2 * 1000
 };
-exports.createAmazonAuthfetch = function (_a) {
-    var credentials = _a.props.credentials;
-    return __awaiter(_this, void 0, void 0, function () {
-        return __generator(this, function (_b) {
-            return [2, ({
-                    authfetch: new nodejs_1.NodeJSMWSClient(ramda_1.compose(ramda_1.tail, ramda_1.split(' '))(credentials.marketplace), credentials.appId, credentials.appSecret, credentials.sellerId, credentials.authToken)
-                })];
-        });
-    });
-};
 exports.checkOrderServiceStatus = function (_a) {
     var authfetch = _a.props.authfetch;
     return __awaiter(_this, void 0, void 0, function () {
@@ -106,6 +96,16 @@ exports.checkOrderServiceStatus = function (_a) {
                             }
                         }
                     });
+                })];
+        });
+    });
+};
+exports.createAmazonAuthfetch = function (_a) {
+    var credentials = _a.props.credentials;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            return [2, ({
+                    authfetch: new nodejs_1.NodeJSMWSClient(ramda_1.compose(ramda_1.tail, ramda_1.split(' '))(credentials.marketplace), credentials.appId, credentials.appSecret, credentials.sellerId, credentials.authToken)
                 })];
         });
     });
@@ -229,6 +229,16 @@ var reportResult$ = function (authfetch) { return function (reportId) {
         });
     }));
 }; };
+exports.createAmazonOrderIdsBatch$ = function (_a) {
+    var orderIds$ = _a.props.orderIds$;
+    return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            return [2, ({
+                    orderIdsBatch$: orderIds$.pipe(operators_1.bufferCount(50))
+                })];
+        });
+    });
+};
 exports.fetchOrderItems$ = function (_a) {
     var _b = _a.props, authfetch = _b.authfetch, orderListNext$ = _b.orderListNext$;
     return ({
@@ -278,6 +288,34 @@ exports.fetchOrderListNext$ = function (_a) {
             var NextToken = _a.NextToken;
             return NextToken ? orderListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
         }), operators_1.concatMap(function (_a) {
+            var Orders = _a.Orders;
+            return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
+        }))
+    });
+};
+exports.fetchOrderIdsBatch$ = function (_a) {
+    var _b = _a.props, authfetch = _b.authfetch, orderIdsBatch$ = _b.orderIdsBatch$;
+    return ({
+        orderListNext$: orderIdsBatch$.pipe(operators_1.concatMap(function (orderIdsBatch) { return rxjs_1.from(new Promise(function (resolve, reject) {
+            var operation = retry.operation(retryStrategyShort);
+            var rqstIds = orderIdsBatch.reduce(function (acc, curr, index) {
+                var _a;
+                return (__assign({}, acc, (_a = {}, _a["AmazonOrderId.Id." + (index + 1)] = curr, _a)));
+            }, {});
+            operation.attempt(function () {
+                authfetch.GetOrder(rqstIds, function (error, response) {
+                    if (error) {
+                        if (operation.retry(error)) {
+                            return;
+                        }
+                        reject(error);
+                    }
+                    else {
+                        resolve((parser.parse(response.body)).GetOrderResponse.GetOrderResult);
+                    }
+                });
+            });
+        })); }), operators_1.concatMap(function (_a) {
             var Orders = _a.Orders;
             return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
         }))
@@ -426,5 +464,11 @@ exports.subscribeReportList = function (_a) {
     var reportListNext$ = _a.props.reportListNext$;
     return new Promise(function (resolve, reject) {
         reportListNext$.pipe(operators_1.toArray(), operators_1.catchError(function (err) { return Promise.reject(err); })).subscribe(function (response) { return resolve({ response: response }); }, function (err) { return reject(new Error(JSON.stringify(err))); });
+    });
+};
+exports.orderIdsObservable = function (_a) {
+    var orderIds = _a.props.orderIds;
+    return ({
+        orderIds$: rxjs_1.from(orderIds)
     });
 };

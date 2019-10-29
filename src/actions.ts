@@ -1,6 +1,6 @@
 import { compose, tail, split, flatten } from 'ramda';
 import { from, throwError, timer, empty, of } from 'rxjs';
-import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catchError } from 'rxjs/operators';
+import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catchError, bufferCount } from 'rxjs/operators';
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
@@ -63,23 +63,6 @@ const retryStrategyLong = {
  */
 
 /**
- * @param credentials - { marketplace, accesskey, secret, sellerID, mwsAuthToken }
- * @return authfetch
- */
-export const createAmazonAuthfetch = async ({ props: { credentials } }) => ({
-  authfetch: new MWSClient(
-    compose(
-      tail,
-      split(' ')
-    )(credentials.marketplace),
-    credentials.appId,
-    credentials.appSecret,
-    credentials.sellerId,
-    credentials.authToken
-  )
-});
-
-/**
  * @param authfetch
  */
 export const checkOrderServiceStatus = async ({ props: { authfetch } }) =>
@@ -95,6 +78,23 @@ new Promise((resolve, reject) => {
       }
     }
   });
+});
+
+/**
+ * @param credentials - { marketplace, accesskey, secret, sellerID, mwsAuthToken }
+ * @return authfetch
+ */
+export const createAmazonAuthfetch = async ({ props: { credentials } }) => ({
+  authfetch: new MWSClient(
+    compose(
+      tail,
+      split(' ')
+    )(credentials.marketplace),
+    credentials.appId,
+    credentials.appSecret,
+    credentials.sellerId,
+    credentials.authToken
+  )
 });
 
 /*
@@ -123,6 +123,7 @@ new Promise((resolve, reject) => {
 //       excludedStatusCodes: [404]
 //     }))
 //   );
+
 const downloadReport$ = authfetch => reportId =>
   from(new Promise((resolve, reject) => {
     if (reportId === null) {
@@ -365,6 +366,12 @@ const reportResult$ = authfetch => reportId =>
  * ----
  */
 
+export const createAmazonOrderIdsBatch$ = async ({ props: { orderIds$ } }) => ({
+  orderIdsBatch$: orderIds$.pipe(
+    bufferCount(50)
+  )
+});
+
 export const fetchOrderItems$ = ({ props: { authfetch, orderListNext$ } }) =>
   ({
     orderItems$: orderListNext$.pipe(
@@ -435,6 +442,31 @@ export const fetchOrderListNext$ = ({ props: { authfetch, orderList$ } }) =>
       concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
       // tap(console.log)
       // toArray()
+    )
+  });
+
+export const fetchOrderIdsBatch$ = ({ props: { authfetch, orderIdsBatch$ } }) =>
+  ({
+    orderListNext$: orderIdsBatch$.pipe(
+      concatMap((orderIdsBatch: any[]) => from(new Promise((resolve, reject) => {
+        var operation = retry.operation(retryStrategyShort);
+
+        const rqstIds = orderIdsBatch.reduce((acc, curr, index) => ({ ...acc, [`AmazonOrderId.Id.${index + 1}`]: curr }), {});
+
+        operation.attempt(function() {
+          authfetch.GetOrder(rqstIds, (error, response) => {
+            if (error) {
+              if (operation.retry(error)) {
+                return;
+              }
+              reject(error);
+            } else {
+              resolve((parser.parse(response.body)).GetOrderResponse.GetOrderResult);
+            }
+          });
+        });
+      }))),
+      concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
     )
   });
 
@@ -619,3 +651,12 @@ export const subscribeReportList = ({ props: { reportListNext$ } }) =>
   new Promise((resolve, reject) => {
     reportListNext$.pipe(toArray(), catchError(err => Promise.reject(err))).subscribe(response => resolve({ response }), err => reject(new Error(JSON.stringify(err))));
   });
+
+
+/*
+  * -- Test Helpers
+  */
+
+export const orderIdsObservable = ({ props: { orderIds } }) => ({
+  orderIds$: from(orderIds)
+});

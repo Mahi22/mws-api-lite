@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/mahesh/.nvm/versions/node/v11.15.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js test
+  /Users/mahesh/.nvm/versions/node/v11.15.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js build-nodejs
 
 PATH: 
   /Users/mahesh/.rvm/gems/ruby-2.6.3/bin:/Users/mahesh/.rvm/gems/ruby-2.6.3@global/bin:/Users/mahesh/.rvm/rubies/ruby-2.6.3/bin:/Users/mahesh/.nvm/versions/node/v11.15.0/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/mahesh/Library/Android/sdk/tools:/Users/mahesh/Library/Android/sdk/platform-tools:/Applications/Postgres.app/Contents/Versions/latest/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/mahesh/Library/Android/sdk/tools:/Users/mahesh/Library/Android/sdk/tools/bin:/Users/mahesh/Library/Android/sdk/platform-tools:/Users/mahesh/.rvm/bin
@@ -1534,15 +1534,19 @@ Lockfile:
     dependencies:
       sax "^1.2.4"
   
+  xml-to-json-stream@^1.1.0:
+    version "1.1.0"
+    resolved "https://registry.yarnpkg.com/xml-to-json-stream/-/xml-to-json-stream-1.1.0.tgz#9dbc56391679f47d7e4370e1019d5251514dece9"
+  
   xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
     version "4.0.1"
     resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
 Trace: 
   Error: Command failed.
-  Exit code: 1
+  Exit code: 2
   Command: sh
-  Arguments: -c mocha --require mocha-steps
+  Arguments: -c tsc -p tsconfig-nodejs.json && npm run init-version -- nodejs
   Directory: /Users/mahesh/Documents/easy/mws-api-lite
   Output:
   

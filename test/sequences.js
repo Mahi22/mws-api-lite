@@ -3,7 +3,19 @@ var FunctionTree = require('function-tree').FunctionTree;
 var moment = require('moment');
 var { toArray, map, flatten } = require('rxjs/operators');
 var Credentials = require('../credentials');
-var { validAmazonCredentials, fetchAmazonOrders, downloadTsvReport, downloadReportList, downloadTsvReportById, downloadXmlReport } = require('../nodejs/sequences');
+var {
+  validAmazonCredentials,
+  fetchAmazonOrders,
+  downloadTsvReport,
+  downloadReportList,
+  downloadTsvReportById,
+  downloadXmlReport,
+  fetchAmazonOrdersByOrderIds
+} = require('../nodejs/sequences');
+
+var {
+  orderIdsObservable
+} = require('../nodejs/actions');
 
 var FT = new FunctionTree();
 
@@ -72,7 +84,6 @@ describe('Sequence', () => {
     })
   }).timeout(12000000)
 
-   */
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     // const StartDate = moment()
     //   .subtract(1, 'days')
@@ -112,6 +123,8 @@ describe('Sequence', () => {
       }
     )
   }).timeout(12000000);
+
+   */
   
 
   // step('sequence request Report XML RETURNS DATA Report', done => {
@@ -167,6 +180,41 @@ describe('Sequence', () => {
   //     }
   //   )
   // }).timeout(12000000);
+
+  step('sequence fetch order by orderIds', done => {
+    FT.run(
+      [
+        orderIdsObservable,
+        fetchAmazonOrdersByOrderIds,
+        ({ props: { orderItems$ } }) => {
+          console.log('-----');
+          // console.log(orderIdsBatch$);
+          orderItems$.subscribe({
+            next: console.log,
+            complete: done
+          })
+          console.log('-----');
+          // done();
+        }
+      ],
+      {
+        // fetchOrderListParams: {
+        //   CreatedAfter: '2019-09-01T13:58:49.394Z',
+        //   // CreatedBefore: moment().subtract(0, 'days').toISOString(),
+        //   'MarketplaceId.Id': Credentials.marketplaceId
+        // },
+        orderIds: [
+          '402-6766908-7545114',
+          '407-2767210-0038711'
+        ],
+        credentials: Credentials
+      }
+    ).catch(err => {
+      console.log('Error CAUGHT');
+      console.log(err);
+      done();
+    })
+  }).timeout(12000000)
 
   
 });

@@ -13,6 +13,12 @@ exports.fetchAmazonOrders = function_tree_1.sequence('Fetching Amazon Orders', [
     actions_1.fetchOrderListNext$,
     actions_1.fetchOrderItems$,
 ]);
+exports.fetchAmazonOrdersByOrderIds = function_tree_1.sequence('Fetching Amazon Order By OrderIds', [
+    actions_1.createAmazonAuthfetch,
+    actions_1.createAmazonOrderIdsBatch$,
+    actions_1.fetchOrderIdsBatch$,
+    actions_1.fetchOrderItems$
+]);
 exports.downloadReport = function_tree_1.sequence('Download Report', [
     actions_1.createAmazonAuthfetch,
     actions_1.requestReport$,

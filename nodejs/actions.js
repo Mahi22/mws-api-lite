@@ -234,7 +234,10 @@ exports.createAmazonOrderIdsBatch$ = function (_a) {
     return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_b) {
             return [2, ({
-                    orderIdsBatch$: orderIds$.pipe(operators_1.bufferCount(50))
+                    orderIdsBatch$: orderIds$.pipe(operators_1.bufferCount(50), operators_1.tap(function (val) {
+                        console.log('CREATED ARRAY');
+                        console.log(val);
+                    }))
                 })];
         });
     });

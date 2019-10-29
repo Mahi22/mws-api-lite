@@ -1,6 +1,6 @@
 import { compose, tail, split, flatten } from 'ramda';
 import { from, throwError, timer, empty, of } from 'rxjs';
-import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catchError, bufferCount } from 'rxjs/operators';
+import { mergeMap, retryWhen, expand, delay, concatMap, toArray, map, skip, catchError, bufferCount, tap } from 'rxjs/operators';
 import * as parser from 'fast-xml-parser';
 import { NodeJSMWSClient as MWSClient } from './nodejs';
 
@@ -368,7 +368,11 @@ const reportResult$ = authfetch => reportId =>
 
 export const createAmazonOrderIdsBatch$ = async ({ props: { orderIds$ } }) => ({
   orderIdsBatch$: orderIds$.pipe(
-    bufferCount(50)
+    bufferCount(50),
+    tap(val => {
+      console.log('CREATED ARRAY');
+      console.log(val);
+    })
   )
 });
 

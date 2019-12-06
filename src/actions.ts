@@ -447,7 +447,7 @@ export const fetchOrderListNext$ = ({ props: { authfetch, orderList$ } }) =>
       // tap(console.log),
       // tap(() => { console.log('*****') }),
       expand(({ NextToken }) => NextToken ? orderListNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
-      concatMap(({ Orders }) => Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : empty()),
+      concatMap(({ Orders }) => Orders ? Array.isArray(Orders.Order) ? Orders.Order : [Orders.Order] : empty()),
       // tap(console.log)
       // toArray()
     )

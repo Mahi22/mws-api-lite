@@ -22,8 +22,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -289,7 +289,7 @@ exports.fetchOrderListNext$ = function (_a) {
             return NextToken ? orderListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
         }), operators_1.concatMap(function (_a) {
             var Orders = _a.Orders;
-            return Orders ? typeof Orders.Order === 'string' ? [Orders.Order] : Orders.Order : rxjs_1.empty();
+            return Orders ? Array.isArray(Orders.Order) ? Orders.Order : [Orders.Order] : rxjs_1.empty();
         }))
     });
 };
@@ -299,8 +299,8 @@ exports.fetchOrderIdsBatch$ = function (_a) {
         orderListNext$: orderIdsBatch$.pipe(operators_1.concatMap(function (orderIdsBatch) { return rxjs_1.from(new Promise(function (resolve, reject) {
             var operation = retry.operation(retryStrategyShort);
             var rqstIds = orderIdsBatch.reduce(function (acc, curr, index) {
-                var _a;
                 return (__assign({}, acc, (_a = {}, _a["AmazonOrderId.Id." + (index + 1)] = curr, _a)));
+                var _a;
             }, {});
             operation.attempt(function () {
                 authfetch.GetOrder(rqstIds, function (error, response) {

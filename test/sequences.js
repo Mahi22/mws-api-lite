@@ -58,21 +58,32 @@ describe('Sequence', () => {
         'MarketplaceId.Id': credentials.marketplaceId
       }
 
+  */
+
   step('sequence fetch order List', done => {
     FT.run(
       [
         fetchAmazonOrders,
-        ({ props: { orderItems } }) => {
+        ({ props: { orderItems$ } }) => {
           console.log('-----');
-          console.log(orderItems);
+          // console.log(orderItems$);
           console.log('-----');
-          done();
+          orderItems$.subscribe({
+            error: err => {
+              console.log('CAUGHT ERROR');
+              console.log(err);
+            },
+            next: console.log,
+            complete: done
+          })
+          // done();
         }
       ],
       {
         fetchOrderListParams: {
-          CreatedAfter: '2019-09-01T13:58:49.394Z',
+          CreatedAfter: '2019-12-04T13:58:49.394Z',
           // CreatedBefore: moment().subtract(0, 'days').toISOString(),
+          'FulfillmentChannel.Channel.1': "AFN",
           'MarketplaceId.Id': Credentials.marketplaceId
         },
         credentials: Credentials
@@ -83,6 +94,8 @@ describe('Sequence', () => {
       done();
     })
   }).timeout(12000000)
+
+  /*
 
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     // const StartDate = moment()
@@ -181,40 +194,40 @@ describe('Sequence', () => {
   //   )
   // }).timeout(12000000);
 
-  step('sequence fetch order by orderIds', done => {
-    FT.run(
-      [
-        orderIdsObservable,
-        fetchAmazonOrdersByOrderIds,
-        ({ props: { orderItems$ } }) => {
-          console.log('-----');
-          // console.log(orderIdsBatch$);
-          orderItems$.subscribe({
-            next: console.log,
-            complete: done
-          })
-          console.log('-----');
-          // done();
-        }
-      ],
-      {
-        // fetchOrderListParams: {
-        //   CreatedAfter: '2019-09-01T13:58:49.394Z',
-        //   // CreatedBefore: moment().subtract(0, 'days').toISOString(),
-        //   'MarketplaceId.Id': Credentials.marketplaceId
-        // },
-        orderIds: [
-          '402-6766908-7545114',
-          // '407-2767210-0038711'
-        ],
-        credentials: Credentials
-      }
-    ).catch(err => {
-      console.log('Error CAUGHT');
-      console.log(err);
-      done();
-    })
-  }).timeout(12000000)
+  // step('sequence fetch order by orderIds', done => {
+  //   FT.run(
+  //     [
+  //       orderIdsObservable,
+  //       fetchAmazonOrdersByOrderIds,
+  //       ({ props: { orderItems$ } }) => {
+  //         console.log('-----');
+  //         // console.log(orderIdsBatch$);
+  //         orderItems$.subscribe({
+  //           next: console.log,
+  //           complete: done
+  //         })
+  //         console.log('-----');
+  //         // done();
+  //       }
+  //     ],
+  //     {
+  //       // fetchOrderListParams: {
+  //       //   CreatedAfter: '2019-09-01T13:58:49.394Z',
+  //       //   // CreatedBefore: moment().subtract(0, 'days').toISOString(),
+  //       //   'MarketplaceId.Id': Credentials.marketplaceId
+  //       // },
+  //       orderIds: [
+  //         '402-6766908-7545114',
+  //         // '407-2767210-0038711'
+  //       ],
+  //       credentials: Credentials
+  //     }
+  //   ).catch(err => {
+  //     console.log('Error CAUGHT');
+  //     console.log(err);
+  //     done();
+  //   })
+  // }).timeout(12000000)
 
   
 });

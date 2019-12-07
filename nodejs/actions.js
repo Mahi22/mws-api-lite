@@ -386,7 +386,7 @@ exports.requestReportListNext$ = function (_a) {
             return NextToken ? reportListNext$(authfetch)(NextToken).pipe(operators_1.delay(10000)) : rxjs_1.empty();
         }), operators_1.concatMap(function (_a) {
             var ReportInfo = _a.ReportInfo;
-            return ReportInfo ? typeof ReportInfo === 'string' ? [ReportInfo] : ReportInfo : rxjs_1.empty();
+            return ReportInfo ? Array.isArray(ReportInfo) ? ReportInfo : [ReportInfo] : rxjs_1.empty();
         }))
     });
 };

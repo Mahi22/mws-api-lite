@@ -583,7 +583,7 @@ export const requestReportListNext$ = ({ props: { authfetch, reportList$ } }) =>
     reportListNext$: reportList$.pipe(
       // tap(console.log),
       expand(({ NextToken }) => NextToken ? reportListNext$(authfetch)(NextToken).pipe(delay(10000)) : empty()),
-      concatMap(({ ReportInfo }) => ReportInfo ? typeof ReportInfo === 'string' ? [ReportInfo] : ReportInfo : empty()),
+      concatMap(({ ReportInfo }) => ReportInfo ? Array.isArray(ReportInfo) ? ReportInfo : [ReportInfo] : empty()),
     )
   });
 

@@ -60,6 +60,8 @@ describe('Sequence', () => {
 
   */
 
+  /*
+
   step('sequence fetch order List', done => {
     FT.run(
       [
@@ -94,8 +96,6 @@ describe('Sequence', () => {
       done();
     })
   }).timeout(12000000)
-
-  /*
 
   step('sequence request Report FBA Amazon Fulfilled Inventory Report', done => {
     // const StartDate = moment()
@@ -138,6 +138,46 @@ describe('Sequence', () => {
   }).timeout(12000000);
 
    */
+
+  step('sequence request Report FBA Amazon Fulfilled Shipment Report', done => {
+    // const StartDate = moment()
+    //   .subtract(1, 'days')
+    //   .startOf('day')
+    //   .toISOString();
+    // const EndDate = moment()
+    //   .startOf('day')
+    //   .toISOString();
+
+    FT.run(
+      [
+        downloadTsvReport,
+        ({ props }) => {
+          console.log('-----');
+          // console.log(json);
+          // done();
+          props.json$.subscribe({
+            next: val => {
+              console.log(val);
+              console.log('----')
+            },
+            complete: () => {
+              console.log('DONE');
+              done();
+            }
+          })
+        }
+      ],
+      {
+        credentials: Credentials,
+        requestReportParams: {
+          ReportType: '_GET_AMAZON_FULFILLED_SHIPMENTS_DATA_',
+          StartDate: '2019-12-10T12:43:29.676Z',
+          // EndDate
+        },
+        tsvSeperator: '\n'
+      }
+    )
+  }).timeout(12000000);
   
 
   // step('sequence request Report XML RETURNS DATA Report', done => {

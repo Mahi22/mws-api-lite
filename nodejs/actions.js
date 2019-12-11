@@ -204,6 +204,7 @@ var reportResult$ = function (authfetch) { return function (reportId) {
                 }
                 else {
                     var response = parser.parse(res.body, { parseTrueNumberOnly: true });
+                    console.log(JSON.stringify(response));
                     if (response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
                         .ReportProcessingStatus === '_DONE_') {
                         resolve(response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo.GeneratedReportId);
@@ -211,6 +212,13 @@ var reportResult$ = function (authfetch) { return function (reportId) {
                     else if (response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
                         .ReportProcessingStatus === '_DONE_NO_DATA_') {
                         resolve(null);
+                    }
+                    else if (response.GetReportRequestListResponse.GetReportRequestListResult.ReportRequestInfo
+                        .ReportProcessingStatus === '_CANCELLED_') {
+                        reject({
+                            status: 404,
+                            message: 'CANCELLED'
+                        });
                     }
                     else {
                         if (operation.retry({
